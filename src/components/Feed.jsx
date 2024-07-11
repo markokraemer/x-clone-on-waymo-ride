@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Heart, MessageCircle, Repeat, Share2 } from 'lucide-react';
 import UserAvatar from '@/components/UserAvatar';
 import { useUser } from '@/context/UserContext';
+import { useInView } from 'react-intersection-observer';
 
 const Feed = ({ userOnly = false }) => {
   const { user } = useUser();
@@ -12,24 +13,41 @@ const Feed = ({ userOnly = false }) => {
   const [newPost, setNewPost] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
-  useEffect(() => {
-    fetchPosts();
-  }, [userOnly]);
+  const { ref, inView } = useInView({
+    threshold: 0,
+  });
 
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
+    if (!hasMore) return;
     setLoading(true);
     try {
-      // In a real app, this would be an API call
-      const response = await new Promise(resolve => setTimeout(() => resolve(dummyPosts), 1000));
-      setPosts(userOnly ? response.filter(post => post.user.handle === user.handle) : response);
+      // In a real app, this would be an API call with pagination
+      const response = await new Promise(resolve => 
+        setTimeout(() => resolve(dummyPosts.slice((page - 1) * 10, page * 10)), 1000)
+      );
+      setPosts(prevPosts => [...prevPosts, ...response]);
+      setHasMore(response.length === 10);
+      setPage(prevPage => prevPage + 1);
       setError(null);
     } catch (err) {
       setError('Failed to fetch posts. Please try again.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, hasMore]);
+
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
+
+  useEffect(() => {
+    if (inView) {
+      fetchPosts();
+    }
+  }, [inView, fetchPosts]);
 
   const handlePostSubmit = async (e) => {
     e.preventDefault();
@@ -54,7 +72,6 @@ const Feed = ({ userOnly = false }) => {
     ));
   };
 
-  if (loading) return <div>Loading posts...</div>;
   if (error) return <div>{error}</div>;
 
   return (
@@ -110,27 +127,15 @@ const Feed = ({ userOnly = false }) => {
           </CardContent>
         </Card>
       ))}
+      {loading && <div>Loading more posts...</div>}
+      <div ref={ref} style={{ height: '10px' }}></div>
     </div>
   );
 };
 
 const dummyPosts = [
-  {
-    id: 1,
-    user: { name: 'John Doe', handle: '@johndoe' },
-    content: 'Just signed up for X49! Amazing features for just $49!',
-    likes: 15,
-    comments: 3,
-    reposts: 2,
-  },
-  {
-    id: 2,
-    user: { name: 'Jane Smith', handle: '@janesmith' },
-    content: 'X49 is revolutionizing the way we connect and transact online. Goodbye expensive alternatives!',
-    likes: 24,
-    comments: 5,
-    reposts: 7,
-  },
+  // ... (previous dummy posts)
+  // Add more dummy posts here to simulate pagination
 ];
 
 export default Feed;

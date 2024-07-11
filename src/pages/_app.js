@@ -1,12 +1,18 @@
 import "@/styles/globals.css";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/toaster";
+import { UserProvider } from "@/context/UserContext";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 export default function App({ Component, pageProps }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <Component {...pageProps} />
-      <Toaster />
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <UserProvider>
+          <Component {...pageProps} />
+          <Toaster />
+        </UserProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
