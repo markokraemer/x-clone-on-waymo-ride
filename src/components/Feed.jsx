@@ -5,10 +5,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heart, MessageCircle, Repeat, Share2, RefreshCw, Hash } from 'lucide-react';
 import UserAvatar from '@/components/UserAvatar';
 import { useUser } from '@/context/UserContext';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import LoadingSkeleton from '@/components/LoadingSkeleton';
 import useFeed from '@/hooks/useFeed';
 import useToast from '@/hooks/useToast';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 const extractHashtags = (content) => {
   const hashtagRegex = /#[a-zA-Z0-9_]+/g;
@@ -20,10 +21,11 @@ const PostCard = React.memo(({ post, onAction, onRepost }) => {
   
   return (
     <motion.div
-      key={post.id}
+      layout
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      exit={{ opacity: 0, y: -50 }}
+      transition={{ duration: 0.3 }}
     >
       <Card className="mb-4">
         <CardContent className="pt-6">
@@ -119,51 +121,54 @@ const Feed = React.forwardRef(({ userOnly = false, onNewPost }, ref) => {
     handleRefresh
   }));
 
-  const memoizedPosts = useMemo(() => posts.map(post => (
-    <PostCard key={post.id} post={post} onAction={handleAction} onRepost={handleRepost} />
-  )), [posts, handleAction, handleRepost]);
-
-  if (error) {
-    return (
-      <div className="text-center">
-        <p className="text-red-500 mb-4">{error}</p>
-        <Button onClick={handleRefresh}>Retry</Button>
-      </div>
-    );
-  }
+  const memoizedPosts = useMemo(() => (
+    <AnimatePresence>
+      {posts.map(post => (
+        <PostCard key={post.id} post={post} onAction={handleAction} onRepost={handleRepost} />
+      ))}
+    </AnimatePresence>
+  ), [posts, handleAction, handleRepost]);
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">Feed</h2>
-        <Button onClick={handleRefresh} disabled={refreshing || loading}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-          {refreshing ? 'Refreshing...' : 'Refresh'}
-        </Button>
+    <ErrorBoundary>
+      <div className="max-w-2xl mx-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold">Feed</h2>
+          <Button onClick={handleRefresh} disabled={refreshing || loading}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+            {refreshing ? 'Refreshing...' : 'Refresh'}
+          </Button>
+        </div>
+        {!userOnly && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Create a Post</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handlePostSubmit}>
+                <Textarea
+                  placeholder="What's happening? Use #hashtags to categorize your post!"
+                  value={newPost}
+                  onChange={(e) => setNewPost(e.target.value)}
+                  className="mb-4"
+                />
+                <Button type="submit">Post</Button>
+              </form>
+            </CardContent>
+          </Card>
+        )}
+        {error && (
+          <div className="text-center">
+            <p className="text-red-500 mb-4">{error}</p>
+            <Button onClick={handleRefresh}>Retry</Button>
+          </div>
+        )}
+        {memoizedPosts}
+        {loading && <LoadingSkeleton />}
+        {!loading && hasMore && <div ref={infiniteScrollRef} style={{ height: '10px' }}></div>}
+        {!hasMore && <p className="text-center text-muted-foreground mt-4">No more posts to load</p>}
       </div>
-      {!userOnly && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Create a Post</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handlePostSubmit}>
-              <Textarea
-                placeholder="What's happening? Use #hashtags to categorize your post!"
-                value={newPost}
-                onChange={(e) => setNewPost(e.target.value)}
-                className="mb-4"
-              />
-              <Button type="submit">Post</Button>
-            </form>
-          </CardContent>
-        </Card>
-      )}
-      {memoizedPosts}
-      {loading && <LoadingSkeleton />}
-      {!loading && hasMore && <div ref={infiniteScrollRef} style={{ height: '10px' }}></div>}
-      {!hasMore && <p className="text-center text-muted-foreground mt-4">No more posts to load</p>}
-    </div>
+    </ErrorBoundary>
   );
 });
 
