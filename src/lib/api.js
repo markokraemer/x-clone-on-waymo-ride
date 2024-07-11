@@ -23,7 +23,10 @@ const simulateErrorChance = () => {
 
 const handleApiError = (error) => {
   console.error('API Error:', error);
-  throw new Error('An unexpected error occurred. Please try again.');
+  return {
+    error: true,
+    message: 'An unexpected error occurred. Please try again.',
+  };
 };
 
 export const api = {
@@ -33,9 +36,14 @@ export const api = {
       simulateErrorChance();
       const start = (page - 1) * limit;
       const end = start + limit;
-      return posts.slice(start, end).map(post => ({...post, id: generateUniqueId()}));
+      const paginatedPosts = posts.slice(start, end).map(post => ({...post, id: generateUniqueId()}));
+      return {
+        data: paginatedPosts,
+        hasMore: end < posts.length,
+        nextPage: end < posts.length ? page + 1 : null,
+      };
     } catch (error) {
-      handleApiError(error);
+      return handleApiError(error);
     }
   },
 
@@ -53,9 +61,9 @@ export const api = {
         timestamp: new Date().toISOString(),
       };
       posts.unshift(newPost);
-      return newPost;
+      return { data: newPost };
     } catch (error) {
-      handleApiError(error);
+      return handleApiError(error);
     }
   },
 
@@ -66,11 +74,11 @@ export const api = {
       const post = posts.find(p => p.id === postId);
       if (post) {
         post.likes += 1;
-        return post;
+        return { data: post };
       }
-      throw new Error('Post not found');
+      return { error: true, message: 'Post not found' };
     } catch (error) {
-      handleApiError(error);
+      return handleApiError(error);
     }
   },
 
@@ -82,11 +90,11 @@ export const api = {
       if (post) {
         post.comments += 1;
         // In a real app, you'd store the comment content as well
-        return post;
+        return { data: post };
       }
-      throw new Error('Post not found');
+      return { error: true, message: 'Post not found' };
     } catch (error) {
-      handleApiError(error);
+      return handleApiError(error);
     }
   },
 
@@ -97,11 +105,11 @@ export const api = {
       const post = posts.find(p => p.id === postId);
       if (post) {
         post.reposts += 1;
-        return post;
+        return { data: post };
       }
-      throw new Error('Post not found');
+      return { error: true, message: 'Post not found' };
     } catch (error) {
-      handleApiError(error);
+      return handleApiError(error);
     }
   },
 
@@ -109,13 +117,14 @@ export const api = {
     try {
       await simulateNetworkDelay();
       simulateErrorChance();
-      return posts.filter(post => 
+      const searchResults = posts.filter(post => 
         post.content.toLowerCase().includes(query.toLowerCase()) ||
         post.user.name.toLowerCase().includes(query.toLowerCase()) ||
         post.user.handle.toLowerCase().includes(query.toLowerCase())
       ).map(post => ({...post, id: generateUniqueId()}));
+      return { data: searchResults };
     } catch (error) {
-      handleApiError(error);
+      return handleApiError(error);
     }
   },
 };

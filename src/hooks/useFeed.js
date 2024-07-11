@@ -3,15 +3,25 @@ import api from '@/lib/api';
 import useInfiniteScroll from './useInfiniteScroll';
 import useToast from './useToast';
 
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000;
+
 const useFeed = () => {
   const [refreshing, setRefreshing] = useState(false);
   const { showToast } = useToast();
 
-  const fetchPosts = useCallback(async (page) => {
+  const fetchPosts = useCallback(async (page, retries = 0) => {
     try {
-      const posts = await api.getPosts(page);
-      return posts;
+      const response = await api.getPosts(page);
+      if (response.error) {
+        throw new Error(response.message);
+      }
+      return response.data;
     } catch (error) {
+      if (retries < MAX_RETRIES) {
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+        return fetchPosts(page, retries + 1);
+      }
       showToast('Error', 'Failed to fetch posts. Please try again.', 'destructive');
       throw error;
     }
@@ -41,8 +51,11 @@ const useFeed = () => {
 
   const createPost = useCallback(async (content, user) => {
     try {
-      const newPost = await api.createPost(content, user);
-      return newPost;
+      const response = await api.createPost(content, user);
+      if (response.error) {
+        throw new Error(response.message);
+      }
+      return response.data;
     } catch (error) {
       showToast('Error', 'Failed to create post. Please try again.', 'destructive');
       throw error;

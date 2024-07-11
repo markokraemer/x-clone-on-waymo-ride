@@ -25,10 +25,13 @@ const ComposeModal = ({ isOpen, onClose, onNewPost, refreshFeed }) => {
     if (content.trim() && content.length <= MAX_CHARACTERS) {
       setIsPosting(true);
       try {
-        const newPost = await api.createPost(content, user);
+        const response = await api.createPost(content, user);
+        if (response.error) {
+          throw new Error(response.message);
+        }
         setContent('');
         onClose();
-        if (onNewPost) onNewPost(newPost);
+        if (onNewPost) onNewPost(response.data);
         if (refreshFeed) refreshFeed();
         showToast("Success", "Your post has been successfully created!", "default");
       } catch (error) {
