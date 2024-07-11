@@ -19,6 +19,9 @@ const Profile = () => {
   const [followers, setFollowers] = useState(0);
   const [following, setFollowing] = useState(0);
   const [posts, setPosts] = useState([]);
+  const [replies, setReplies] = useState([]);
+  const [media, setMedia] = useState([]);
+  const [likes, setLikes] = useState([]);
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -28,6 +31,9 @@ const Profile = () => {
       setFollowers(faker.number.int({ min: 100, max: 10000 }));
       setFollowing(faker.number.int({ min: 50, max: 1000 }));
       setPosts(generateMockPosts(20));
+      setReplies(generateMockPosts(10));
+      setMedia(generateMockMedia(15));
+      setLikes(generateMockPosts(25));
     }
   }, [user]);
 
@@ -38,6 +44,15 @@ const Profile = () => {
       likes: faker.number.int({ min: 0, max: 1000 }),
       comments: faker.number.int({ min: 0, max: 100 }),
       reposts: faker.number.int({ min: 0, max: 50 }),
+      timestamp: faker.date.recent(),
+    }));
+  };
+
+  const generateMockMedia = (count) => {
+    return Array.from({ length: count }, () => ({
+      id: faker.string.uuid(),
+      type: faker.helpers.arrayElement(['image', 'video']),
+      url: faker.image.url(),
       timestamp: faker.date.recent(),
     }));
   };
@@ -111,28 +126,26 @@ const Profile = () => {
           <TabsTrigger value="likes">Likes</TabsTrigger>
         </TabsList>
         <TabsContent value="posts">
-          {posts.map((post) => (
-            <Card key={post.id} className="mb-4">
-              <CardContent className="pt-6">
-                <p>{post.content}</p>
-                <div className="flex justify-between mt-4 text-sm text-muted-foreground">
-                  <span>{post.likes} Likes</span>
-                  <span>{post.comments} Comments</span>
-                  <span>{post.reposts} Reposts</span>
-                  <span>{new Date(post.timestamp).toLocaleDateString()}</span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          <Feed posts={posts} />
         </TabsContent>
         <TabsContent value="replies">
-          <p>Replies content (to be implemented)</p>
+          <Feed posts={replies} />
         </TabsContent>
         <TabsContent value="media">
-          <p>Media content (to be implemented)</p>
+          <div className="grid grid-cols-3 gap-4">
+            {media.map((item) => (
+              <div key={item.id} className="aspect-square">
+                {item.type === 'image' ? (
+                  <img src={item.url} alt="Media" className="w-full h-full object-cover rounded" />
+                ) : (
+                  <video src={item.url} className="w-full h-full object-cover rounded" controls />
+                )}
+              </div>
+            ))}
+          </div>
         </TabsContent>
         <TabsContent value="likes">
-          <p>Likes content (to be implemented)</p>
+          <Feed posts={likes} />
         </TabsContent>
       </Tabs>
     </Layout>

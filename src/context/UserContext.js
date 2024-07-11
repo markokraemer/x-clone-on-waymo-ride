@@ -14,8 +14,16 @@ export const UserProvider = ({ children }) => {
   }, []);
 
   const login = (userData) => {
-    setUser(userData);
-    localStorage.setItem('x49_user', JSON.stringify(userData));
+    const newUser = {
+      ...userData,
+      preferences: {
+        notifications: true,
+        darkMode: false,
+        ...userData.preferences,
+      },
+    };
+    setUser(newUser);
+    localStorage.setItem('x49_user', JSON.stringify(newUser));
   };
 
   const logout = () => {
@@ -23,8 +31,13 @@ export const UserProvider = ({ children }) => {
     localStorage.removeItem('x49_user');
   };
 
+  const updateUser = (updatedUserData) => {
+    setUser(updatedUserData);
+    localStorage.setItem('x49_user', JSON.stringify(updatedUserData));
+  };
+
   return (
-    <UserContext.Provider value={{ user, login, logout }}>
+    <UserContext.Provider value={{ user, login, logout, updateUser }}>
       {children}
     </UserContext.Provider>
   );
