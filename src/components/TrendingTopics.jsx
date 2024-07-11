@@ -1,15 +1,23 @@
+import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { faker } from '@faker-js/faker';
 
-const trendingTopics = [
-  { id: 1, name: '#X49Launch', posts: '50K' },
-  { id: 2, name: 'Elon Musk', posts: '40K' },
-  { id: 3, name: '#TechRevolution', posts: '35K' },
-  { id: 4, name: 'Crypto', posts: '28K' },
-  { id: 5, name: '#AI', posts: '25K' },
-];
+const generateTrendingTopics = (count) => {
+  return Array.from({ length: count }, () => ({
+    id: faker.string.uuid(),
+    name: faker.lorem.words(2),
+    posts: faker.number.int({ min: 1000, max: 100000 }),
+  }));
+};
 
 const TrendingTopics = () => {
+  const [trendingTopics, setTrendingTopics] = useState([]);
+
+  useEffect(() => {
+    setTrendingTopics(generateTrendingTopics(5));
+  }, []);
+
   return (
     <Card>
       <CardHeader>
@@ -20,9 +28,9 @@ const TrendingTopics = () => {
           {trendingTopics.map((topic) => (
             <li key={topic.id} className="flex justify-between items-center">
               <Button variant="link" className="p-0 h-auto font-medium text-left">
-                {topic.name}
+                #{topic.name}
               </Button>
-              <span className="text-sm text-muted-foreground">{topic.posts} posts</span>
+              <span className="text-sm text-muted-foreground">{topic.posts.toLocaleString()} posts</span>
             </li>
           ))}
         </ul>

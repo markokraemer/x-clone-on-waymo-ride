@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
 import Feed from '@/components/Feed';
 import { Button } from '@/components/ui/button';
@@ -9,13 +9,38 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useUser } from '@/context/UserContext';
 import useToast from '@/hooks/useToast';
+import { faker } from '@faker-js/faker';
 
 const Profile = () => {
   const { user, login } = useUser();
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(user?.name || '');
   const [bio, setBio] = useState(user?.bio || '');
+  const [followers, setFollowers] = useState(0);
+  const [following, setFollowing] = useState(0);
+  const [posts, setPosts] = useState([]);
   const { showToast } = useToast();
+
+  useEffect(() => {
+    if (user) {
+      setName(user.name);
+      setBio(user.bio || '');
+      setFollowers(faker.number.int({ min: 100, max: 10000 }));
+      setFollowing(faker.number.int({ min: 50, max: 1000 }));
+      setPosts(generateMockPosts(20));
+    }
+  }, [user]);
+
+  const generateMockPosts = (count) => {
+    return Array.from({ length: count }, () => ({
+      id: faker.string.uuid(),
+      content: faker.lorem.paragraph(),
+      likes: faker.number.int({ min: 0, max: 1000 }),
+      comments: faker.number.int({ min: 0, max: 100 }),
+      reposts: faker.number.int({ min: 0, max: 50 }),
+      timestamp: faker.date.recent(),
+    }));
+  };
 
   if (!user) {
     return (
@@ -68,8 +93,8 @@ const Profile = () => {
                   <p className="text-muted-foreground">{user.handle}</p>
                   <p className="mt-2">{user.bio}</p>
                   <div className="mt-4 flex justify-center sm:justify-start space-x-4">
-                    <span><strong>{user.followers}</strong> Followers</span>
-                    <span><strong>{user.following}</strong> Following</span>
+                    <span><strong>{followers.toLocaleString()}</strong> Followers</span>
+                    <span><strong>{following.toLocaleString()}</strong> Following</span>
                   </div>
                   <Button onClick={() => setIsEditing(true)} className="mt-4">Edit Profile</Button>
                 </>
@@ -86,7 +111,19 @@ const Profile = () => {
           <TabsTrigger value="likes">Likes</TabsTrigger>
         </TabsList>
         <TabsContent value="posts">
-          <Feed userOnly={true} />
+          {posts.map((post) => (
+            <Card key={post.id} className="mb-4">
+              <CardContent className="pt-6">
+                <p>{post.content}</p>
+                <div className="flex justify-between mt-4 text-sm text-muted-foreground">
+                  <span>{post.likes} Likes</span>
+                  <span>{post.comments} Comments</span>
+                  <span>{post.reposts} Reposts</span>
+                  <span>{new Date(post.timestamp).toLocaleDateString()}</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </TabsContent>
         <TabsContent value="replies">
           <p>Replies content (to be implemented)</p>
