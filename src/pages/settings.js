@@ -1,13 +1,25 @@
 import { useState } from 'react';
 import Layout from '@/components/Layout';
+import { useUser } from '@/context/UserContext';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 
 const Settings = () => {
+  const { user, login } = useUser();
+  const [name, setName] = useState(user?.name || '');
+  const [bio, setBio] = useState(user?.bio || '');
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    login({ ...user, name, bio });
+    // In a real app, you would send this to your backend
+  };
 
   return (
     <Layout>
@@ -15,7 +27,35 @@ const Settings = () => {
         <h1 className="text-3xl font-bold mb-6">Settings</h1>
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Account</CardTitle>
+            <CardTitle>Profile Information</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="bio">Bio</Label>
+                <Textarea
+                  id="bio"
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  rows={3}
+                />
+              </div>
+              <Button type="submit">Save Changes</Button>
+            </form>
+          </CardContent>
+        </Card>
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Preferences</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">

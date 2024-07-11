@@ -4,11 +4,16 @@ import Feed from '@/components/Feed';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { useUser } from '@/context/UserContext';
 
 const Profile = () => {
-  const { user } = useUser();
+  const { user, login } = useUser();
   const [activeTab, setActiveTab] = useState('posts');
+  const [isEditing, setIsEditing] = useState(false);
+  const [name, setName] = useState(user?.name || '');
+  const [bio, setBio] = useState(user?.bio || '');
 
   if (!user) {
     return (
@@ -21,6 +26,11 @@ const Profile = () => {
     );
   }
 
+  const handleSave = () => {
+    login({ ...user, name, bio });
+    setIsEditing(false);
+  };
+
   return (
     <Layout>
       <Card className="mb-6">
@@ -30,14 +40,37 @@ const Profile = () => {
               <AvatarImage src={user.avatar} alt={user.name} />
               <AvatarFallback>{user.name[0]}</AvatarFallback>
             </Avatar>
-            <div className="text-center sm:text-left">
-              <h1 className="text-2xl font-bold">{user.name}</h1>
-              <p className="text-muted-foreground">{user.handle}</p>
-              <p className="mt-2">{user.bio}</p>
-              <div className="mt-4 flex justify-center sm:justify-start space-x-4">
-                <span><strong>{user.followers}</strong> Followers</span>
-                <span><strong>{user.following}</strong> Following</span>
-              </div>
+            <div className="text-center sm:text-left flex-grow">
+              {isEditing ? (
+                <div className="space-y-2">
+                  <Input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Name"
+                  />
+                  <Textarea
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    placeholder="Bio"
+                    rows={3}
+                  />
+                  <div>
+                    <Button onClick={handleSave} className="mr-2">Save</Button>
+                    <Button variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <h1 className="text-2xl font-bold">{user.name}</h1>
+                  <p className="text-muted-foreground">{user.handle}</p>
+                  <p className="mt-2">{user.bio}</p>
+                  <div className="mt-4 flex justify-center sm:justify-start space-x-4">
+                    <span><strong>{user.followers}</strong> Followers</span>
+                    <span><strong>{user.following}</strong> Following</span>
+                  </div>
+                  <Button onClick={() => setIsEditing(true)} className="mt-4">Edit Profile</Button>
+                </>
+              )}
             </div>
           </div>
         </CardContent>
