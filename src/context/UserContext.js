@@ -4,6 +4,7 @@ const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Check for saved user in localStorage
@@ -11,6 +12,7 @@ export const UserProvider = ({ children }) => {
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
+    setLoading(false);
   }, []);
 
   const login = (userData) => {
@@ -36,8 +38,20 @@ export const UserProvider = ({ children }) => {
     localStorage.setItem('x49_user', JSON.stringify(updatedUserData));
   };
 
+  const updatePreferences = (newPreferences) => {
+    const updatedUser = {
+      ...user,
+      preferences: {
+        ...user.preferences,
+        ...newPreferences,
+      },
+    };
+    setUser(updatedUser);
+    localStorage.setItem('x49_user', JSON.stringify(updatedUser));
+  };
+
   return (
-    <UserContext.Provider value={{ user, login, logout, updateUser }}>
+    <UserContext.Provider value={{ user, loading, login, logout, updateUser, updatePreferences }}>
       {children}
     </UserContext.Provider>
   );

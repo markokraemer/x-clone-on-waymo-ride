@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import Layout from '@/components/Layout';
 
-export default function NotFound() {
+export default function Custom404() {
   return (
     <Layout>
       <div className="flex flex-col items-center justify-center min-h-screen text-center">
