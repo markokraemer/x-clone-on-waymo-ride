@@ -1,20 +1,28 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Progress } from '@/components/ui/progress';
 import UserAvatar from '@/components/UserAvatar';
 import { useUser } from '@/context/UserContext';
-import { useToast } from '@/components/ui/use-toast';
+import useToast from '@/hooks/useToast';
 import api from '@/lib/api';
+
+const MAX_CHARACTERS = 280;
 
 const ComposeModal = ({ isOpen, onClose, onNewPost, refreshFeed }) => {
   const [content, setContent] = useState('');
   const [isPosting, setIsPosting] = useState(false);
   const { user } = useUser();
-  const { toast } = useToast();
+  const { showToast } = useToast();
+  const [charactersLeft, setCharactersLeft] = useState(MAX_CHARACTERS);
+
+  useEffect(() => {
+    setCharactersLeft(MAX_CHARACTERS - content.length);
+  }, [content]);
 
   const handleSubmit = async () => {
-    if (content.trim()) {
+    if (content.trim() && content.length <= MAX_CHARACTERS) {
       setIsPosting(true);
       try {
         const newPost = await api.createPost(content, user);
@@ -22,17 +30,10 @@ const ComposeModal = ({ isOpen, onClose, onNewPost, refreshFeed }) => {
         onClose();
         if (onNewPost) onNewPost(newPost);
         if (refreshFeed) refreshFeed();
-        toast({
-          title: "Post created",
-          description: "Your post has been successfully created!",
-        });
+        showToast("Success", "Your post has been successfully created!", "default");
       } catch (error) {
         console.error('Failed to create post:', error);
-        toast({
-          title: "Error",
-          description: "Failed to create post. Please try again.",
-          variant: "destructive",
-        });
+        showToast("Error", "Failed to create post. Please try again.", "destructive");
       } finally {
         setIsPosting(false);
       }
@@ -41,23 +42,35 @@ const ComposeModal = ({ isOpen, onClose, onNewPost, refreshFeed }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Compose new post</DialogTitle>
         </DialogHeader>
-        <div className="flex items-start space-x-4">
-          <UserAvatar user={user} />
-          <Textarea
-            placeholder="What's happening?"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={4}
-            className="flex-grow"
-          />
+        <div className="grid gap-4 py-4">
+          <div className="flex items-start space-x-4">
+            <UserAvatar user={user} />
+            <Textarea
+              placeholder="What's happening?"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              rows={4}
+              className="flex-grow resize-none"
+              maxLength={MAX_CHARACTERS}
+            />
+          </div>
+          <div className="flex justify-between items-center">
+            <Progress value={(charactersLeft / MAX_CHARACTERS) * 100} className="w-1/2" />
+            <span className={`text-sm ${charactersLeft < 0 ? 'text-red-500' : 'text-muted-foreground'}`}>
+              {charactersLeft} characters left
+            </span>
+          </div>
         </div>
         <DialogFooter>
           <Button onClick={onClose} variant="outline">Cancel</Button>
-          <Button onClick={handleSubmit} disabled={!content.trim() || isPosting}>
+          <Button 
+            onClick={handleSubmit} 
+            disabled={!content.trim() || content.length > MAX_CHARACTERS || isPosting}
+          >
             {isPosting ? 'Posting...' : 'Post'}
           </Button>
         </DialogFooter>

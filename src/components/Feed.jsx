@@ -7,40 +7,47 @@ import UserAvatar from '@/components/UserAvatar';
 import { useUser } from '@/context/UserContext';
 import { useInView } from 'react-intersection-observer';
 import useToast from '@/hooks/useToast';
+import { motion } from 'framer-motion';
 import api from '@/lib/api';
 
 const PostCard = React.memo(({ post, onAction }) => (
-  <Card className="mb-4">
-    <CardContent className="pt-6">
-      <div className="flex items-start space-x-4">
-        <UserAvatar user={post.user} />
-        <div className="flex-1">
-          <div className="flex items-center space-x-2">
-            <h3 className="font-semibold">{post.user.name}</h3>
-            <span className="text-sm text-muted-foreground">{post.user.handle}</span>
-          </div>
-          <p className="mt-2 mb-4">{post.content}</p>
-          <div className="flex justify-between text-muted-foreground">
-            <Button variant="ghost" size="sm" onClick={() => onAction(post.id, 'likes')}
-                    className="hover:text-red-500 transition-colors duration-200">
-              <Heart className="h-4 w-4 mr-1" /> {post.likes}
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => onAction(post.id, 'comments')}
-                    className="hover:text-blue-500 transition-colors duration-200">
-              <MessageCircle className="h-4 w-4 mr-1" /> {post.comments}
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => onAction(post.id, 'reposts')}
-                    className="hover:text-green-500 transition-colors duration-200">
-              <Repeat className="h-4 w-4 mr-1" /> {post.reposts}
-            </Button>
-            <Button variant="ghost" size="sm" className="hover:text-primary transition-colors duration-200">
-              <Share2 className="h-4 w-4" />
-            </Button>
+  <motion.div
+    initial={{ opacity: 0, y: 50 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5 }}
+  >
+    <Card className="mb-4">
+      <CardContent className="pt-6">
+        <div className="flex items-start space-x-4">
+          <UserAvatar user={post.user} />
+          <div className="flex-1">
+            <div className="flex items-center space-x-2">
+              <h3 className="font-semibold">{post.user.name}</h3>
+              <span className="text-sm text-muted-foreground">{post.user.handle}</span>
+            </div>
+            <p className="mt-2 mb-4">{post.content}</p>
+            <div className="flex justify-between text-muted-foreground">
+              <Button variant="ghost" size="sm" onClick={() => onAction(post.id, 'likes')}
+                      className="hover:text-red-500 transition-colors duration-200">
+                <Heart className={`h-4 w-4 mr-1 ${post.liked ? 'fill-current text-red-500' : ''}`} /> {post.likes}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => onAction(post.id, 'comments')}
+                      className="hover:text-blue-500 transition-colors duration-200">
+                <MessageCircle className="h-4 w-4 mr-1" /> {post.comments}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => onAction(post.id, 'reposts')}
+                      className="hover:text-green-500 transition-colors duration-200">
+                <Repeat className={`h-4 w-4 mr-1 ${post.reposted ? 'fill-current text-green-500' : ''}`} /> {post.reposts}
+              </Button>
+              <Button variant="ghost" size="sm" className="hover:text-primary transition-colors duration-200">
+                <Share2 className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
-    </CardContent>
-  </Card>
+      </CardContent>
+    </Card>
+  </motion.div>
 ));
 
 const Feed = React.forwardRef(({ userOnly = false, onNewPost }, ref) => {
@@ -108,6 +115,23 @@ const Feed = React.forwardRef(({ userOnly = false, onNewPost }, ref) => {
   };
 
   const handleAction = useCallback(async (postId, action) => {
+    // Optimistic update
+    setPosts(prevPosts => prevPosts.map(post => {
+      if (post.id === postId) {
+        switch (action) {
+          case 'likes':
+            return { ...post, likes: post.likes + 1, liked: true };
+          case 'comments':
+            return { ...post, comments: post.comments + 1 };
+          case 'reposts':
+            return { ...post, reposts: post.reposts + 1, reposted: true };
+          default:
+            return post;
+        }
+      }
+      return post;
+    }));
+
     try {
       let updatedPost;
       switch (action) {
@@ -125,6 +149,22 @@ const Feed = React.forwardRef(({ userOnly = false, onNewPost }, ref) => {
       }
       setPosts(prevPosts => prevPosts.map(post => post.id === postId ? updatedPost : post));
     } catch (err) {
+      // Revert optimistic update on error
+      setPosts(prevPosts => prevPosts.map(post => {
+        if (post.id === postId) {
+          switch (action) {
+            case 'likes':
+              return { ...post, likes: post.likes - 1, liked: false };
+            case 'comments':
+              return { ...post, comments: post.comments - 1 };
+            case 'reposts':
+              return { ...post, reposts: post.reposts - 1, reposted: false };
+            default:
+              return post;
+          }
+        }
+        return post;
+      }));
       setError(`Failed to ${action} post. Please try again.`);
       showToast("Error", `Failed to ${action} post. Please try again.`, "destructive");
     }
