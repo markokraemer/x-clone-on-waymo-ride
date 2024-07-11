@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Heart, MessageCircle, Repeat, Share2, RefreshCw } from 'lucide-react';
+import { Heart, MessageCircle, Repeat, Share2, RefreshCw, Hash } from 'lucide-react';
 import UserAvatar from '@/components/UserAvatar';
 import { useUser } from '@/context/UserContext';
 import { useInView } from 'react-intersection-observer';
@@ -11,51 +11,70 @@ import { motion } from 'framer-motion';
 import LoadingSkeleton from '@/components/LoadingSkeleton';
 import api from '@/lib/api';
 
-const PostCard = React.memo(({ post, onAction, onRepost }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 50 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5 }}
-  >
-    <Card className="mb-4">
-      <CardContent className="pt-6">
-        {post.repostedBy && (
-          <p className="text-sm text-muted-foreground mb-2">
-            <Repeat className="inline-block w-4 h-4 mr-1" />
-            Reposted by {post.repostedBy.name}
-          </p>
-        )}
-        <div className="flex items-start space-x-4">
-          <UserAvatar user={post.user} />
-          <div className="flex-1">
-            <div className="flex items-center space-x-2">
-              <h3 className="font-semibold">{post.user.name}</h3>
-              <span className="text-sm text-muted-foreground">{post.user.handle}</span>
-            </div>
-            <p className="mt-2 mb-4">{post.content}</p>
-            <div className="flex justify-between text-muted-foreground">
-              <Button variant="ghost" size="sm" onClick={() => onAction(post.id, 'likes')}
-                      className="hover:text-red-500 transition-colors duration-200">
-                <Heart className={`h-4 w-4 mr-1 ${post.liked ? 'fill-current text-red-500' : ''}`} /> {post.likes}
-              </Button>
-              <Button variant="ghost" size="sm" onClick={() => onAction(post.id, 'comments')}
-                      className="hover:text-blue-500 transition-colors duration-200">
-                <MessageCircle className="h-4 w-4 mr-1" /> {post.comments}
-              </Button>
-              <Button variant="ghost" size="sm" onClick={() => onRepost(post)}
-                      className="hover:text-green-500 transition-colors duration-200">
-                <Repeat className={`h-4 w-4 mr-1 ${post.reposted ? 'fill-current text-green-500' : ''}`} /> {post.reposts}
-              </Button>
-              <Button variant="ghost" size="sm" className="hover:text-primary transition-colors duration-200">
-                <Share2 className="h-4 w-4" />
-              </Button>
+const extractHashtags = (content) => {
+  const hashtagRegex = /#[a-zA-Z0-9_]+/g;
+  return content.match(hashtagRegex) || [];
+};
+
+const PostCard = React.memo(({ post, onAction, onRepost }) => {
+  const hashtags = extractHashtags(post.content);
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Card className="mb-4">
+        <CardContent className="pt-6">
+          {post.repostedBy && (
+            <p className="text-sm text-muted-foreground mb-2">
+              <Repeat className="inline-block w-4 h-4 mr-1" />
+              Reposted by {post.repostedBy.name}
+            </p>
+          )}
+          <div className="flex items-start space-x-4">
+            <UserAvatar user={post.user} />
+            <div className="flex-1">
+              <div className="flex items-center space-x-2">
+                <h3 className="font-semibold">{post.user.name}</h3>
+                <span className="text-sm text-muted-foreground">{post.user.handle}</span>
+              </div>
+              <p className="mt-2 mb-2">{post.content}</p>
+              {hashtags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {hashtags.map((tag, index) => (
+                    <span key={index} className="text-primary text-sm">
+                      <Hash className="inline-block w-3 h-3 mr-1" />
+                      {tag.slice(1)}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <div className="flex justify-between text-muted-foreground">
+                <Button variant="ghost" size="sm" onClick={() => onAction(post.id, 'likes')}
+                        className="hover:text-red-500 transition-colors duration-200">
+                  <Heart className={`h-4 w-4 mr-1 ${post.liked ? 'fill-current text-red-500' : ''}`} /> {post.likes}
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => onAction(post.id, 'comments')}
+                        className="hover:text-blue-500 transition-colors duration-200">
+                  <MessageCircle className="h-4 w-4 mr-1" /> {post.comments}
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => onRepost(post)}
+                        className="hover:text-green-500 transition-colors duration-200">
+                  <Repeat className={`h-4 w-4 mr-1 ${post.reposted ? 'fill-current text-green-500' : ''}`} /> {post.reposts}
+                </Button>
+                <Button variant="ghost" size="sm" className="hover:text-primary transition-colors duration-200">
+                  <Share2 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
-  </motion.div>
-));
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+});
 
 const Feed = React.forwardRef(({ userOnly = false, onNewPost }, ref) => {
   const { user } = useUser();
@@ -220,7 +239,7 @@ const Feed = React.forwardRef(({ userOnly = false, onNewPost }, ref) => {
           <CardContent>
             <form onSubmit={handlePostSubmit}>
               <Textarea
-                placeholder="What's happening?"
+                placeholder="What's happening? Use #hashtags to categorize your post!"
                 value={newPost}
                 onChange={(e) => setNewPost(e.target.value)}
                 className="mb-4"
