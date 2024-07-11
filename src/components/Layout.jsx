@@ -6,6 +6,7 @@ import NotificationCenter from '@/components/NotificationCenter';
 import TrendingTopics from '@/components/TrendingTopics';
 import DarkModeToggle from '@/components/DarkModeToggle';
 import NotificationSystem from '@/components/NotificationSystem';
+import WhoToFollow from '@/components/WhoToFollow';
 
 const Layout = ({ children }) => {
   return (
@@ -27,6 +28,7 @@ const Layout = ({ children }) => {
             </div>
             <NotificationCenter />
             <TrendingTopics />
+            <WhoToFollow />
             <PricingCard />
             <Card>
               <CardContent className="p-4">
