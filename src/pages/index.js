@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Layout from '@/components/Layout';
 import Feed from '@/components/Feed';
 import ComposeButton from '@/components/ComposeButton';
@@ -8,15 +8,18 @@ import { useUser } from '@/context/UserContext';
 export default function Home() {
   const [isComposeModalOpen, setIsComposeModalOpen] = useState(false);
   const { user } = useUser();
+  const feedRef = useRef();
 
   const handleNewPost = (newPost) => {
-    // The Feed component now handles adding the new post to its state
     setIsComposeModalOpen(false);
+    if (feedRef.current && feedRef.current.handleRefresh) {
+      feedRef.current.handleRefresh();
+    }
   };
 
   return (
     <Layout>
-      <Feed onNewPost={handleNewPost} />
+      <Feed ref={feedRef} onNewPost={handleNewPost} />
       {user && (
         <>
           <ComposeButton onClick={() => setIsComposeModalOpen(true)} />
@@ -24,6 +27,7 @@ export default function Home() {
             isOpen={isComposeModalOpen} 
             onClose={() => setIsComposeModalOpen(false)}
             onNewPost={handleNewPost}
+            refreshFeed={() => feedRef.current && feedRef.current.handleRefresh()}
           />
         </>
       )}
