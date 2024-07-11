@@ -23,12 +23,12 @@ const NavBar = () => {
             <span className="ml-2 text-2xl font-bold text-primary">X49</span>
           </Link>
           <div className="flex items-center space-x-4">
-            <div className="hidden md:block">
+            <div className="hidden md:flex items-center relative">
+              <Search className="h-5 w-5 text-muted-foreground absolute left-3" />
               <Input
                 type="text"
                 placeholder="Search X49"
-                className="w-64"
-                startAdornment={<Search className="h-5 w-5 text-muted-foreground" />}
+                className="w-64 pl-10"
               />
             </div>
             <Link href="/" passHref>

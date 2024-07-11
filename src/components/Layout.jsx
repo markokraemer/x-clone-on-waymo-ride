@@ -1,4 +1,5 @@
 import NavBar from '@/components/NavBar';
+import Sidebar from '@/components/Sidebar';
 import { Card, CardContent } from '@/components/ui/card';
 import PricingCard from '@/components/PricingCard';
 
@@ -7,13 +8,16 @@ const Layout = ({ children }) => {
     <div className="min-h-screen bg-background">
       <NavBar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <Card className="lg:col-span-3">
+        <div className="flex flex-col lg:flex-row gap-6">
+          <div className="hidden lg:block w-64">
+            <Sidebar />
+          </div>
+          <Card className="flex-grow">
             <CardContent className="p-6">
               {children}
             </CardContent>
           </Card>
-          <div className="space-y-6">
+          <div className="lg:w-80 space-y-6">
             <PricingCard />
             <Card>
               <CardContent className="p-4">

@@ -82,16 +82,19 @@ const Feed = ({ userOnly = false }) => {
                 </div>
                 <p className="mt-2 mb-4">{post.content}</p>
                 <div className="flex justify-between text-muted-foreground">
-                  <Button variant="ghost" size="sm" onClick={() => handleAction(post.id, 'likes')}>
+                  <Button variant="ghost" size="sm" onClick={() => handleAction(post.id, 'likes')}
+                          className="hover:text-red-500 transition-colors duration-200">
                     <Heart className="h-4 w-4 mr-1" /> {post.likes}
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleAction(post.id, 'comments')}>
+                  <Button variant="ghost" size="sm" onClick={() => handleAction(post.id, 'comments')}
+                          className="hover:text-blue-500 transition-colors duration-200">
                     <MessageCircle className="h-4 w-4 mr-1" /> {post.comments}
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleAction(post.id, 'reposts')}>
+                  <Button variant="ghost" size="sm" onClick={() => handleAction(post.id, 'reposts')}
+                          className="hover:text-green-500 transition-colors duration-200">
                     <Repeat className="h-4 w-4 mr-1" /> {post.reposts}
                   </Button>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" className="hover:text-primary transition-colors duration-200">
                     <Share2 className="h-4 w-4" />
                   </Button>
                 </div>
