@@ -6,14 +6,16 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useUser } from '@/context/UserContext';
+import useToast from '@/hooks/useToast';
 
 const Profile = () => {
   const { user, login } = useUser();
-  const [activeTab, setActiveTab] = useState('posts');
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(user?.name || '');
   const [bio, setBio] = useState(user?.bio || '');
+  const { showToast } = useToast();
 
   if (!user) {
     return (
@@ -29,6 +31,7 @@ const Profile = () => {
   const handleSave = () => {
     login({ ...user, name, bio });
     setIsEditing(false);
+    showToast("Success", "Profile updated successfully!", "default");
   };
 
   return (
@@ -75,35 +78,26 @@ const Profile = () => {
           </div>
         </CardContent>
       </Card>
-      <div className="mb-6">
-        <div className="flex space-x-4 mb-4">
-          <Button
-            variant={activeTab === 'posts' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('posts')}
-          >
-            Posts
-          </Button>
-          <Button
-            variant={activeTab === 'replies' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('replies')}
-          >
-            Replies
-          </Button>
-          <Button
-            variant={activeTab === 'media' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('media')}
-          >
-            Media
-          </Button>
-          <Button
-            variant={activeTab === 'likes' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('likes')}
-          >
-            Likes
-          </Button>
-        </div>
-        <Feed userOnly={true} />
-      </div>
+      <Tabs defaultValue="posts">
+        <TabsList>
+          <TabsTrigger value="posts">Posts</TabsTrigger>
+          <TabsTrigger value="replies">Replies</TabsTrigger>
+          <TabsTrigger value="media">Media</TabsTrigger>
+          <TabsTrigger value="likes">Likes</TabsTrigger>
+        </TabsList>
+        <TabsContent value="posts">
+          <Feed userOnly={true} />
+        </TabsContent>
+        <TabsContent value="replies">
+          <p>Replies content (to be implemented)</p>
+        </TabsContent>
+        <TabsContent value="media">
+          <p>Media content (to be implemented)</p>
+        </TabsContent>
+        <TabsContent value="likes">
+          <p>Likes content (to be implemented)</p>
+        </TabsContent>
+      </Tabs>
     </Layout>
   );
 };
