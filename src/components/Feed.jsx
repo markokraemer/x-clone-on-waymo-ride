@@ -11,7 +11,7 @@ import { motion } from 'framer-motion';
 import LoadingSkeleton from '@/components/LoadingSkeleton';
 import api from '@/lib/api';
 
-const PostCard = React.memo(({ post, onAction }) => (
+const PostCard = React.memo(({ post, onAction, onRepost }) => (
   <motion.div
     initial={{ opacity: 0, y: 50 }}
     animate={{ opacity: 1, y: 0 }}
@@ -19,6 +19,12 @@ const PostCard = React.memo(({ post, onAction }) => (
   >
     <Card className="mb-4">
       <CardContent className="pt-6">
+        {post.repostedBy && (
+          <p className="text-sm text-muted-foreground mb-2">
+            <Repeat className="inline-block w-4 h-4 mr-1" />
+            Reposted by {post.repostedBy.name}
+          </p>
+        )}
         <div className="flex items-start space-x-4">
           <UserAvatar user={post.user} />
           <div className="flex-1">
@@ -36,7 +42,7 @@ const PostCard = React.memo(({ post, onAction }) => (
                       className="hover:text-blue-500 transition-colors duration-200">
                 <MessageCircle className="h-4 w-4 mr-1" /> {post.comments}
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => onAction(post.id, 'reposts')}
+              <Button variant="ghost" size="sm" onClick={() => onRepost(post)}
                       className="hover:text-green-500 transition-colors duration-200">
                 <Repeat className={`h-4 w-4 mr-1 ${post.reposted ? 'fill-current text-green-500' : ''}`} /> {post.reposts}
               </Button>
@@ -171,6 +177,17 @@ const Feed = React.forwardRef(({ userOnly = false, onNewPost }, ref) => {
     }
   }, [showToast]);
 
+  const handleRepost = useCallback(async (post) => {
+    try {
+      const repostedPost = await api.repostPost(post.id);
+      setPosts(prevPosts => [repostedPost, ...prevPosts]);
+      showToast("Success", "Post reposted successfully!", "default");
+    } catch (err) {
+      setError('Failed to repost. Please try again.');
+      showToast("Error", "Failed to repost. Please try again.", "destructive");
+    }
+  }, [showToast]);
+
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
     fetchPosts(true);
@@ -181,8 +198,8 @@ const Feed = React.forwardRef(({ userOnly = false, onNewPost }, ref) => {
   }));
 
   const memoizedPosts = useMemo(() => posts.map(post => (
-    <PostCard key={post.id} post={post} onAction={handleAction} />
-  )), [posts, handleAction]);
+    <PostCard key={post.id} post={post} onAction={handleAction} onRepost={handleRepost} />
+  )), [posts, handleAction, handleRepost]);
 
   if (error) return <div>{error}</div>;
 
