@@ -3,13 +3,22 @@ import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/toaster";
 import { UserProvider } from "@/context/UserContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import PrivateRoute from "@/components/PrivateRoute";
 
-export default function App({ Component, pageProps }) {
+const protectedRoutes = ['/profile', '/settings', '/messages'];
+
+export default function App({ Component, pageProps, router }) {
   return (
     <ErrorBoundary>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <UserProvider>
-          <Component {...pageProps} />
+          {protectedRoutes.includes(router.pathname) ? (
+            <PrivateRoute>
+              <Component {...pageProps} />
+            </PrivateRoute>
+          ) : (
+            <Component {...pageProps} />
+          )}
           <Toaster />
         </UserProvider>
       </ThemeProvider>

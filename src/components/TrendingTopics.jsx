@@ -1,4 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 const trendingTopics = [
   { id: 1, name: '#X49Launch', posts: '50K' },
@@ -18,7 +19,9 @@ const TrendingTopics = () => {
         <ul className="space-y-2">
           {trendingTopics.map((topic) => (
             <li key={topic.id} className="flex justify-between items-center">
-              <span className="font-medium">{topic.name}</span>
+              <Button variant="link" className="p-0 h-auto font-medium text-left">
+                {topic.name}
+              </Button>
               <span className="text-sm text-muted-foreground">{topic.posts} posts</span>
             </li>
           ))}
