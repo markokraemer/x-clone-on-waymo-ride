@@ -1,18 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { faker } from '@faker-js/faker';
 
-const dummyNotifications = [
-  { id: 1, content: 'John Doe liked your post', read: false },
-  { id: 2, content: 'Jane Smith retweeted your post', read: false },
-  { id: 3, content: 'New follower: Alice Johnson', read: true },
-];
+const generateMockNotifications = (count) => {
+  return Array.from({ length: count }, () => ({
+    id: faker.string.uuid(),
+    content: faker.helpers.arrayElement([
+      'liked your post',
+      'commented on your post',
+      'mentioned you in a post',
+      'started following you',
+    ]),
+    user: faker.person.fullName(),
+    read: faker.datatype.boolean(),
+    timestamp: faker.date.recent(),
+  }));
+};
 
 const NotificationCenter = () => {
-  const [notifications, setNotifications] = useState(dummyNotifications);
+  const [notifications, setNotifications] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    setNotifications(generateMockNotifications(10));
+  }, []);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -49,7 +63,10 @@ const NotificationCenter = () => {
                   }`}
                   onClick={() => handleNotificationClick(notification.id)}
                 >
-                  {notification.content}
+                  <p className="font-medium">{notification.user} {notification.content}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(notification.timestamp).toLocaleTimeString()}
+                  </p>
                 </div>
               ))}
             </ScrollArea>
