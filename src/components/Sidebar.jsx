@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Button } from '@/components/ui/button';
-import { Home, MessageSquare, Bell, User, Settings, Search, TrendingUp, DollarSign } from 'lucide-react';
+import { Home, MessageSquare, Bell, User, Settings, Search, TrendingUp, DollarSign, Users } from 'lucide-react';
 
 const Sidebar = () => {
   const router = useRouter();
@@ -11,6 +11,7 @@ const Sidebar = () => {
     { href: '/search', icon: Search, label: 'Search' },
     { href: '/notifications', icon: Bell, label: 'Notifications' },
     { href: '/messages', icon: MessageSquare, label: 'Messages' },
+    { href: '/discover', icon: Users, label: 'Discover' },
     { href: '/profile', icon: User, label: 'Profile' },
     { href: '/settings', icon: Settings, label: 'Settings' },
     { href: '/trending', icon: TrendingUp, label: 'Trending' },
