@@ -10,6 +10,7 @@ import useToast from '@/hooks/useToast';
 import { motion } from 'framer-motion';
 import LoadingSkeleton from '@/components/LoadingSkeleton';
 import api from '@/lib/api';
+import { debounce } from 'lodash';
 
 const extractHashtags = (content) => {
   const hashtagRegex = /#[a-zA-Z0-9_]+/g;
@@ -81,7 +82,7 @@ const Feed = React.forwardRef(({ userOnly = false, onNewPost }, ref) => {
   const { user } = useUser();
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -93,7 +94,7 @@ const Feed = React.forwardRef(({ userOnly = false, onNewPost }, ref) => {
   });
 
   const fetchPosts = useCallback(async (refresh = false) => {
-    if (!hasMore && !refresh) return;
+    if ((!hasMore && !refresh) || loading) return;
     setLoading(true);
     try {
       const newPosts = await api.getPosts(refresh ? 1 : page);
@@ -113,17 +114,25 @@ const Feed = React.forwardRef(({ userOnly = false, onNewPost }, ref) => {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [page, hasMore, showToast]);
+  }, [page, hasMore, loading, showToast]);
 
   useEffect(() => {
     fetchPosts();
-  }, [fetchPosts]);
+  }, []);
+
+  const debouncedFetchPosts = useMemo(
+    () => debounce(() => {
+      if (inView && !loading && hasMore) {
+        fetchPosts();
+      }
+    }, 300),
+    [inView, loading, hasMore, fetchPosts]
+  );
 
   useEffect(() => {
-    if (inView && !loading && hasMore) {
-      fetchPosts();
-    }
-  }, [inView, fetchPosts, loading, hasMore]);
+    debouncedFetchPosts();
+    return () => debouncedFetchPosts.cancel();
+  }, [debouncedFetchPosts]);
 
   const handlePostSubmit = async (e) => {
     e.preventDefault();
@@ -221,13 +230,20 @@ const Feed = React.forwardRef(({ userOnly = false, onNewPost }, ref) => {
     <PostCard key={post.id} post={post} onAction={handleAction} onRepost={handleRepost} />
   )), [posts, handleAction, handleRepost]);
 
-  if (error) return <div>{error}</div>;
+  if (error) {
+    return (
+      <div className="text-center">
+        <p className="text-red-500 mb-4">{error}</p>
+        <Button onClick={() => fetchPosts(true)}>Retry</Button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Feed</h2>
-        <Button onClick={handleRefresh} disabled={refreshing}>
+        <Button onClick={handleRefresh} disabled={refreshing || loading}>
           <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
           {refreshing ? 'Refreshing...' : 'Refresh'}
         </Button>
@@ -252,7 +268,8 @@ const Feed = React.forwardRef(({ userOnly = false, onNewPost }, ref) => {
       )}
       {memoizedPosts}
       {loading && <LoadingSkeleton />}
-      <div ref={inViewRef} style={{ height: '10px' }}></div>
+      {!loading && hasMore && <div ref={inViewRef} style={{ height: '10px' }}></div>}
+      {!hasMore && <p className="text-center text-muted-foreground mt-4">No more posts to load</p>}
     </div>
   );
 });
