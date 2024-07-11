@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import PricingCard from '@/components/PricingCard';
 import NotificationCenter from '@/components/NotificationCenter';
 import TrendingTopics from '@/components/TrendingTopics';
+import DarkModeToggle from '@/components/DarkModeToggle';
 
 const Layout = ({ children }) => {
   return (
@@ -20,6 +21,9 @@ const Layout = ({ children }) => {
             </CardContent>
           </Card>
           <div className="lg:w-80 space-y-6">
+            <div className="flex justify-end mb-4">
+              <DarkModeToggle />
+            </div>
             <NotificationCenter />
             <TrendingTopics />
             <PricingCard />
