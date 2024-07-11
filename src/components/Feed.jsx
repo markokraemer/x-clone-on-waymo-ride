@@ -119,10 +119,10 @@ const Feed = React.forwardRef(({ userOnly = false, onNewPost }, ref) => {
   }, [fetchPosts]);
 
   useEffect(() => {
-    if (inView) {
+    if (inView && !loading && hasMore) {
       fetchPosts();
     }
-  }, [inView, fetchPosts]);
+  }, [inView, fetchPosts, loading, hasMore]);
 
   const handlePostSubmit = async (e) => {
     e.preventDefault();
@@ -249,16 +249,8 @@ const Feed = React.forwardRef(({ userOnly = false, onNewPost }, ref) => {
           </CardContent>
         </Card>
       )}
-      {loading && !posts.length ? (
-        <>
-          <LoadingSkeleton />
-          <LoadingSkeleton />
-          <LoadingSkeleton />
-        </>
-      ) : (
-        memoizedPosts
-      )}
-      {loading && posts.length > 0 && <LoadingSkeleton />}
+      {memoizedPosts}
+      {loading && <LoadingSkeleton />}
       <div ref={inViewRef} style={{ height: '10px' }}></div>
     </div>
   );
