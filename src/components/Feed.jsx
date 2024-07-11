@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -6,10 +6,44 @@ import { Heart, MessageCircle, Repeat, Share2, RefreshCw } from 'lucide-react';
 import UserAvatar from '@/components/UserAvatar';
 import { useUser } from '@/context/UserContext';
 import { useInView } from 'react-intersection-observer';
-import { useToast } from '@/components/ui/use-toast';
+import useToast from '@/hooks/useToast';
 import api from '@/lib/api';
 
-const Feed = ({ userOnly = false, onNewPost }) => {
+const PostCard = React.memo(({ post, onAction }) => (
+  <Card className="mb-4">
+    <CardContent className="pt-6">
+      <div className="flex items-start space-x-4">
+        <UserAvatar user={post.user} />
+        <div className="flex-1">
+          <div className="flex items-center space-x-2">
+            <h3 className="font-semibold">{post.user.name}</h3>
+            <span className="text-sm text-muted-foreground">{post.user.handle}</span>
+          </div>
+          <p className="mt-2 mb-4">{post.content}</p>
+          <div className="flex justify-between text-muted-foreground">
+            <Button variant="ghost" size="sm" onClick={() => onAction(post.id, 'likes')}
+                    className="hover:text-red-500 transition-colors duration-200">
+              <Heart className="h-4 w-4 mr-1" /> {post.likes}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => onAction(post.id, 'comments')}
+                    className="hover:text-blue-500 transition-colors duration-200">
+              <MessageCircle className="h-4 w-4 mr-1" /> {post.comments}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => onAction(post.id, 'reposts')}
+                    className="hover:text-green-500 transition-colors duration-200">
+              <Repeat className="h-4 w-4 mr-1" /> {post.reposts}
+            </Button>
+            <Button variant="ghost" size="sm" className="hover:text-primary transition-colors duration-200">
+              <Share2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+));
+
+const Feed = React.forwardRef(({ userOnly = false, onNewPost }, ref) => {
   const { user } = useUser();
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState('');
@@ -18,9 +52,9 @@ const Feed = ({ userOnly = false, onNewPost }) => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const { toast } = useToast();
+  const { showToast } = useToast();
 
-  const { ref, inView } = useInView({
+  const { ref: inViewRef, inView } = useInView({
     threshold: 0,
   });
 
@@ -40,16 +74,12 @@ const Feed = ({ userOnly = false, onNewPost }) => {
       setError(null);
     } catch (err) {
       setError('Failed to fetch posts. Please try again.');
-      toast({
-        title: "Error",
-        description: "Failed to fetch posts. Please try again.",
-        variant: "destructive",
-      });
+      showToast("Error", "Failed to fetch posts. Please try again.", "destructive");
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [page, hasMore, toast]);
+  }, [page, hasMore, showToast]);
 
   useEffect(() => {
     fetchPosts();
@@ -69,22 +99,15 @@ const Feed = ({ userOnly = false, onNewPost }) => {
         setPosts(prevPosts => [post, ...prevPosts]);
         setNewPost('');
         if (onNewPost) onNewPost(post);
-        toast({
-          title: "Post created",
-          description: "Your post has been successfully created!",
-        });
+        showToast("Success", "Your post has been successfully created!", "default");
       } catch (err) {
         setError('Failed to create post. Please try again.');
-        toast({
-          title: "Error",
-          description: "Failed to create post. Please try again.",
-          variant: "destructive",
-        });
+        showToast("Error", "Failed to create post. Please try again.", "destructive");
       }
     }
   };
 
-  const handleAction = async (postId, action) => {
+  const handleAction = useCallback(async (postId, action) => {
     try {
       let updatedPost;
       switch (action) {
@@ -103,18 +126,22 @@ const Feed = ({ userOnly = false, onNewPost }) => {
       setPosts(prevPosts => prevPosts.map(post => post.id === postId ? updatedPost : post));
     } catch (err) {
       setError(`Failed to ${action} post. Please try again.`);
-      toast({
-        title: "Error",
-        description: `Failed to ${action} post. Please try again.`,
-        variant: "destructive",
-      });
+      showToast("Error", `Failed to ${action} post. Please try again.`, "destructive");
     }
-  };
+  }, [showToast]);
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     setRefreshing(true);
     fetchPosts(true);
-  };
+  }, [fetchPosts]);
+
+  React.useImperativeHandle(ref, () => ({
+    handleRefresh
+  }));
+
+  const memoizedPosts = useMemo(() => posts.map(post => (
+    <PostCard key={post.id} post={post} onAction={handleAction} />
+  )), [posts, handleAction]);
 
   if (error) return <div>{error}</div>;
 
@@ -145,43 +172,13 @@ const Feed = ({ userOnly = false, onNewPost }) => {
           </CardContent>
         </Card>
       )}
-      {posts.map((post, index) => (
-        <Card key={`${post.id}-${index}`} className="mb-4">
-          <CardContent className="pt-6">
-            <div className="flex items-start space-x-4">
-              <UserAvatar user={post.user} />
-              <div className="flex-1">
-                <div className="flex items-center space-x-2">
-                  <h3 className="font-semibold">{post.user.name}</h3>
-                  <span className="text-sm text-muted-foreground">{post.user.handle}</span>
-                </div>
-                <p className="mt-2 mb-4">{post.content}</p>
-                <div className="flex justify-between text-muted-foreground">
-                  <Button variant="ghost" size="sm" onClick={() => handleAction(post.id, 'likes')}
-                          className="hover:text-red-500 transition-colors duration-200">
-                    <Heart className="h-4 w-4 mr-1" /> {post.likes}
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleAction(post.id, 'comments')}
-                          className="hover:text-blue-500 transition-colors duration-200">
-                    <MessageCircle className="h-4 w-4 mr-1" /> {post.comments}
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleAction(post.id, 'reposts')}
-                          className="hover:text-green-500 transition-colors duration-200">
-                    <Repeat className="h-4 w-4 mr-1" /> {post.reposts}
-                  </Button>
-                  <Button variant="ghost" size="sm" className="hover:text-primary transition-colors duration-200">
-                    <Share2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+      {memoizedPosts}
       {loading && <div className="text-center py-4">Loading more posts...</div>}
-      <div ref={ref} style={{ height: '10px' }}></div>
+      <div ref={inViewRef} style={{ height: '10px' }}></div>
     </div>
   );
-};
+});
+
+Feed.displayName = 'Feed';
 
 export default Feed;

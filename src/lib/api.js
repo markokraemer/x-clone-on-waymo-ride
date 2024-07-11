@@ -11,16 +11,28 @@ const generateUniqueId = () => {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 };
 
+const simulateNetworkDelay = async () => {
+  await delay(Math.random() * 1000 + 500); // Random delay between 500-1500ms
+};
+
+const simulateErrorChance = () => {
+  if (Math.random() < 0.1) { // 10% chance of error
+    throw new Error('Simulated network error');
+  }
+};
+
 export const api = {
   getPosts: async (page = 1, limit = 10) => {
-    await delay(500); // Simulate network delay
+    await simulateNetworkDelay();
+    simulateErrorChance();
     const start = (page - 1) * limit;
     const end = start + limit;
     return posts.slice(start, end);
   },
 
   createPost: async (content, user) => {
-    await delay(500);
+    await simulateNetworkDelay();
+    simulateErrorChance();
     const newPost = {
       id: generateUniqueId(),
       user,
@@ -35,7 +47,8 @@ export const api = {
   },
 
   likePost: async (postId) => {
-    await delay(200);
+    await simulateNetworkDelay();
+    simulateErrorChance();
     const post = posts.find(p => p.id === postId);
     if (post) {
       post.likes += 1;
@@ -45,7 +58,8 @@ export const api = {
   },
 
   commentOnPost: async (postId, comment) => {
-    await delay(300);
+    await simulateNetworkDelay();
+    simulateErrorChance();
     const post = posts.find(p => p.id === postId);
     if (post) {
       post.comments += 1;
@@ -56,7 +70,8 @@ export const api = {
   },
 
   repostPost: async (postId) => {
-    await delay(200);
+    await simulateNetworkDelay();
+    simulateErrorChance();
     const post = posts.find(p => p.id === postId);
     if (post) {
       post.reposts += 1;
@@ -66,7 +81,8 @@ export const api = {
   },
 
   searchPosts: async (query) => {
-    await delay(300);
+    await simulateNetworkDelay();
+    simulateErrorChance();
     return posts.filter(post => 
       post.content.toLowerCase().includes(query.toLowerCase()) ||
       post.user.name.toLowerCase().includes(query.toLowerCase()) ||
