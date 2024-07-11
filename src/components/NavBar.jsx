@@ -3,12 +3,11 @@ import { useRouter } from 'next/router';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import UserAvatar from '@/components/UserAvatar';
-import { Home, MessageSquare, Bell, Settings, Moon, Sun } from 'lucide-react';
-import { useTheme } from 'next-themes';
+import Logo from '@/components/Logo';
+import { Home, MessageSquare, Bell, Settings, Search } from 'lucide-react';
 
 const NavBar = () => {
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
 
   const user = {
     name: 'John Doe',
@@ -17,17 +16,21 @@ const NavBar = () => {
 
   return (
     <nav className="border-b sticky top-0 z-10 bg-background">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="flex-shrink-0 flex items-center">
-            <span className="text-2xl font-bold text-primary">X49</span>
+            <Logo className="h-8 w-8 text-primary" />
+            <span className="ml-2 text-2xl font-bold text-primary">X49</span>
           </Link>
           <div className="flex items-center space-x-4">
-            <Input
-              type="text"
-              placeholder="Search..."
-              className="hidden md:block w-64"
-            />
+            <div className="hidden md:block">
+              <Input
+                type="text"
+                placeholder="Search X49"
+                className="w-64"
+                startAdornment={<Search className="h-5 w-5 text-muted-foreground" />}
+              />
+            </div>
             <Link href="/" passHref>
               <Button variant={router.pathname === '/' ? 'default' : 'ghost'} size="icon">
                 <Home className="h-5 w-5" />
@@ -46,13 +49,6 @@ const NavBar = () => {
                 <Settings className="h-5 w-5" />
               </Button>
             </Link>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            >
-              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </Button>
             <Link href="/profile" passHref>
               <Button variant="ghost" size="icon">
                 <UserAvatar user={user} size="sm" />
