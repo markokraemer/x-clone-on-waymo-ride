@@ -24,7 +24,7 @@ const dummyPosts = [
   },
 ];
 
-const Feed = () => {
+const Feed = ({ userOnly = false }) => {
   const [posts, setPosts] = useState(dummyPosts);
   const [newPost, setNewPost] = useState('');
 
@@ -44,6 +44,20 @@ const Feed = () => {
     }
   };
 
+  const handleLike = (postId) => {
+    setPosts(posts.map(post => 
+      post.id === postId ? { ...post, likes: post.likes + 1 } : post
+    ));
+  };
+
+  const handleRepost = (postId) => {
+    setPosts(posts.map(post => 
+      post.id === postId ? { ...post, reposts: post.reposts + 1 } : post
+    ));
+  };
+
+  const displayPosts = userOnly ? posts.filter(post => post.user.handle === '@currentuser') : posts;
+
   return (
     <div className="max-w-2xl mx-auto">
       <Card className="mb-6">
@@ -62,7 +76,7 @@ const Feed = () => {
           </form>
         </CardContent>
       </Card>
-      {posts.map((post) => (
+      {displayPosts.map((post) => (
         <Card key={post.id} className="mb-4">
           <CardHeader>
             <div className="flex items-center">
@@ -79,13 +93,13 @@ const Feed = () => {
           <CardContent>
             <p className="mb-4">{post.content}</p>
             <div className="flex justify-between text-muted-foreground">
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" onClick={() => handleLike(post.id)}>
                 <Heart className="h-4 w-4 mr-1" /> {post.likes}
               </Button>
               <Button variant="ghost" size="sm">
                 <MessageCircle className="h-4 w-4 mr-1" /> {post.comments}
               </Button>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" onClick={() => handleRepost(post.id)}>
                 <Repeat className="h-4 w-4 mr-1" /> {post.reposts}
               </Button>
             </div>
