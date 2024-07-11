@@ -14,15 +14,61 @@ const generateTrendingTopics = (count) => {
 
 const TrendingTopics = () => {
   const [trendingTopics, setTrendingTopics] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
-    setTrendingTopics(generateTrendingTopics(5));
+    const fetchTrendingTopics = async () => {
+      try {
+        setLoading(true);
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        setTrendingTopics(generateTrendingTopics(5));
+        setError(null);
+      } catch (err) {
+        setError('Failed to fetch trending topics. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrendingTopics();
   }, []);
 
   const handleTopicClick = (topicName) => {
     router.push(`/search?q=${encodeURIComponent(topicName)}`);
   };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Trending Topics</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="h-6 bg-gray-200 rounded animate-pulse"></div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Trending Topics</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-red-500">{error}</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>

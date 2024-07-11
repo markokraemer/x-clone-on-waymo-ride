@@ -27,7 +27,7 @@ export const api = {
     simulateErrorChance();
     const start = (page - 1) * limit;
     const end = start + limit;
-    return posts.slice(start, end);
+    return posts.slice(start, end).map(post => ({...post, id: generateUniqueId()}));
   },
 
   createPost: async (content, user) => {
@@ -87,7 +87,7 @@ export const api = {
       post.content.toLowerCase().includes(query.toLowerCase()) ||
       post.user.name.toLowerCase().includes(query.toLowerCase()) ||
       post.user.handle.toLowerCase().includes(query.toLowerCase())
-    );
+    ).map(post => ({...post, id: generateUniqueId()}));
   },
 };
 
