@@ -2,10 +2,9 @@
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-const posts = [
-  { id: 1, user: { name: 'John Doe', handle: '@johndoe' }, content: 'Just signed up for X49! Amazing features for just $49!', likes: 15, comments: 3, reposts: 2 },
-  { id: 2, user: { name: 'Jane Smith', handle: '@janesmith' }, content: 'X49 is revolutionizing the way we connect and transact online. Goodbye expensive alternatives!', likes: 24, comments: 5, reposts: 7 },
-  // Add more mock posts here
+let posts = [
+  { id: 1, user: { name: 'John Doe', handle: '@johndoe' }, content: 'Just signed up for X49! Amazing features for just $49!', likes: 15, comments: 3, reposts: 2, timestamp: new Date().toISOString() },
+  { id: 2, user: { name: 'Jane Smith', handle: '@janesmith' }, content: 'X49 is revolutionizing the way we connect and transact online. Goodbye expensive alternatives!', likes: 24, comments: 5, reposts: 7, timestamp: new Date().toISOString() },
 ];
 
 export const api = {
@@ -25,6 +24,7 @@ export const api = {
       likes: 0,
       comments: 0,
       reposts: 0,
+      timestamp: new Date().toISOString(),
     };
     posts.unshift(newPost);
     return newPost;

@@ -3,15 +3,24 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import UserAvatar from '@/components/UserAvatar';
+import { useUser } from '@/context/UserContext';
+import api from '@/lib/api';
 
-const ComposeModal = ({ isOpen, onClose }) => {
+const ComposeModal = ({ isOpen, onClose, onNewPost }) => {
   const [content, setContent] = useState('');
+  const { user } = useUser();
 
-  const handleSubmit = () => {
-    // Here you would typically send the post to your backend
-    console.log('New post:', content);
-    setContent('');
-    onClose();
+  const handleSubmit = async () => {
+    if (content.trim()) {
+      try {
+        const newPost = await api.createPost(content, user);
+        setContent('');
+        onClose();
+        if (onNewPost) onNewPost(newPost);
+      } catch (error) {
+        console.error('Failed to create post:', error);
+      }
+    }
   };
 
   return (
@@ -21,7 +30,7 @@ const ComposeModal = ({ isOpen, onClose }) => {
           <DialogTitle>Compose new post</DialogTitle>
         </DialogHeader>
         <div className="flex items-start space-x-4">
-          <UserAvatar user={{ name: 'Current User' }} />
+          <UserAvatar user={user} />
           <Textarea
             placeholder="What's happening?"
             value={content}

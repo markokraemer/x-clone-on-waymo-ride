@@ -8,7 +8,7 @@ import { useUser } from '@/context/UserContext';
 import { useInView } from 'react-intersection-observer';
 import api from '@/lib/api';
 
-const Feed = ({ userOnly = false }) => {
+const Feed = ({ userOnly = false, onNewPost }) => {
   const { user } = useUser();
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState('');
@@ -54,6 +54,7 @@ const Feed = ({ userOnly = false }) => {
         const post = await api.createPost(newPost, user);
         setPosts([post, ...posts]);
         setNewPost('');
+        if (onNewPost) onNewPost(post);
       } catch (err) {
         setError('Failed to create post. Please try again.');
       }

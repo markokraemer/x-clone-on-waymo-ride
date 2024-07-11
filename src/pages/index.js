@@ -3,30 +3,25 @@ import Layout from '@/components/Layout';
 import Feed from '@/components/Feed';
 import ComposeButton from '@/components/ComposeButton';
 import ComposeModal from '@/components/ComposeModal';
-import { useUser } from '@/context/UserContext';
 
 export default function Home() {
   const [isComposeModalOpen, setIsComposeModalOpen] = useState(false);
-  const { user } = useUser();
+  const [posts, setPosts] = useState([]);
 
-  const handlePostCreated = (newPost) => {
-    // You might want to update the feed here, or let the Feed component handle it
-    console.log('New post created:', newPost);
+  const handleNewPost = (newPost) => {
+    setPosts([newPost, ...posts]);
+    setIsComposeModalOpen(false);
   };
 
   return (
     <Layout>
-      <Feed />
-      {user && (
-        <>
-          <ComposeButton onClick={() => setIsComposeModalOpen(true)} />
-          <ComposeModal
-            isOpen={isComposeModalOpen}
-            onClose={() => setIsComposeModalOpen(false)}
-            onPostCreated={handlePostCreated}
-          />
-        </>
-      )}
+      <Feed onNewPost={handleNewPost} />
+      <ComposeButton onClick={() => setIsComposeModalOpen(true)} />
+      <ComposeModal 
+        isOpen={isComposeModalOpen} 
+        onClose={() => setIsComposeModalOpen(false)}
+        onNewPost={handleNewPost}
+      />
     </Layout>
   );
 }
