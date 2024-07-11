@@ -3,9 +3,13 @@
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 let posts = [
-  { id: 1, user: { name: 'John Doe', handle: '@johndoe' }, content: 'Just signed up for X49! Amazing features for just $49!', likes: 15, comments: 3, reposts: 2, timestamp: new Date().toISOString() },
-  { id: 2, user: { name: 'Jane Smith', handle: '@janesmith' }, content: 'X49 is revolutionizing the way we connect and transact online. Goodbye expensive alternatives!', likes: 24, comments: 5, reposts: 7, timestamp: new Date().toISOString() },
+  { id: '1', user: { name: 'John Doe', handle: '@johndoe' }, content: 'Just signed up for X49! Amazing features for just $49!', likes: 15, comments: 3, reposts: 2, timestamp: new Date().toISOString() },
+  { id: '2', user: { name: 'Jane Smith', handle: '@janesmith' }, content: 'X49 is revolutionizing the way we connect and transact online. Goodbye expensive alternatives!', likes: 24, comments: 5, reposts: 7, timestamp: new Date().toISOString() },
 ];
+
+const generateUniqueId = () => {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2);
+};
 
 export const api = {
   getPosts: async (page = 1, limit = 10) => {
@@ -18,7 +22,7 @@ export const api = {
   createPost: async (content, user) => {
     await delay(500);
     const newPost = {
-      id: posts.length + 1,
+      id: generateUniqueId(),
       user,
       content,
       likes: 0,

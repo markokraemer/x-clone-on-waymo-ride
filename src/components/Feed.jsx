@@ -52,7 +52,7 @@ const Feed = ({ userOnly = false, onNewPost }) => {
     if (newPost.trim()) {
       try {
         const post = await api.createPost(newPost, user);
-        setPosts([post, ...posts]);
+        setPosts(prevPosts => [post, ...prevPosts]);
         setNewPost('');
         if (onNewPost) onNewPost(post);
       } catch (err) {
@@ -69,7 +69,6 @@ const Feed = ({ userOnly = false, onNewPost }) => {
           updatedPost = await api.likePost(postId);
           break;
         case 'comments':
-          // For simplicity, we're not implementing a full comment system here
           updatedPost = await api.commentOnPost(postId, 'A new comment');
           break;
         case 'reposts':
@@ -78,7 +77,7 @@ const Feed = ({ userOnly = false, onNewPost }) => {
         default:
           return;
       }
-      setPosts(posts.map(post => post.id === postId ? updatedPost : post));
+      setPosts(prevPosts => prevPosts.map(post => post.id === postId ? updatedPost : post));
     } catch (err) {
       setError(`Failed to ${action} post. Please try again.`);
     }
@@ -106,8 +105,8 @@ const Feed = ({ userOnly = false, onNewPost }) => {
           </CardContent>
         </Card>
       )}
-      {posts.map((post) => (
-        <Card key={post.id} className="mb-4">
+      {posts.map((post, index) => (
+        <Card key={`${post.id}-${index}`} className="mb-4">
           <CardContent className="pt-6">
             <div className="flex items-start space-x-4">
               <UserAvatar user={post.user} />
