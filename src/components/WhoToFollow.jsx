@@ -15,9 +15,25 @@ const generateSuggestedUsers = (count) => {
 
 const WhoToFollow = () => {
   const [suggestedUsers, setSuggestedUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    setSuggestedUsers(generateSuggestedUsers(3));
+    const fetchSuggestedUsers = async () => {
+      try {
+        setLoading(true);
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        setSuggestedUsers(generateSuggestedUsers(3));
+        setError(null);
+      } catch (err) {
+        setError('Failed to fetch suggested users. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSuggestedUsers();
   }, []);
 
   const handleFollow = (userId) => {
@@ -26,6 +42,42 @@ const WhoToFollow = () => {
     // For now, let's just remove the user from the suggestions
     setSuggestedUsers(suggestedUsers.filter(user => user.id !== userId));
   };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Who to Follow</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex items-center space-x-4">
+                <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse"></div>
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 rounded animate-pulse w-5/6"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Who to Follow</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-red-500">{error}</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>

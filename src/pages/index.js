@@ -10,9 +10,12 @@ import { useUser } from '@/context/UserContext';
 import useToast from '@/hooks/useToast';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 export default function Home() {
   const [isComposeModalOpen, setIsComposeModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { user } = useUser();
   const feedRef = useRef();
   const { showToast } = useToast();
@@ -25,6 +28,26 @@ export default function Home() {
     }
     showToast("Success", "Your post has been created successfully!", "default");
   };
+
+  if (loading) {
+    return (
+      <Layout>
+        <LoadingSpinner />
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Error</h1>
+          <p className="text-red-500 mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
