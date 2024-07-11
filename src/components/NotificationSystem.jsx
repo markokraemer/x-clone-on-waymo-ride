@@ -2,22 +2,23 @@ import { useState, useEffect } from 'react';
 import { Toast, ToastProvider, ToastViewport } from '@/components/ui/toast';
 import { useToast } from '@/components/ui/use-toast';
 import { useUser } from '@/context/UserContext';
+import useNotifications from '@/hooks/useNotifications';
 
 const NotificationSystem = () => {
   const { toast } = useToast();
   const { user } = useUser();
-  const [notifications, setNotifications] = useState([]);
+  const { notifications, addNotification } = useNotifications();
 
   useEffect(() => {
     // Simulating receiving notifications
     const interval = setInterval(() => {
-      if (user && user.preferences.notifications) {
+      if (user?.preferences?.notifications) {
         const newNotification = {
           id: Date.now(),
           title: 'New Notification',
           description: `You have a new notification at ${new Date().toLocaleTimeString()}`,
         };
-        setNotifications(prev => [...prev, newNotification]);
+        addNotification(newNotification);
         toast({
           title: newNotification.title,
           description: newNotification.description,
@@ -26,7 +27,7 @@ const NotificationSystem = () => {
     }, 60000); // Every minute
 
     return () => clearInterval(interval);
-  }, [user, toast]);
+  }, [user, toast, addNotification]);
 
   return (
     <ToastProvider>
