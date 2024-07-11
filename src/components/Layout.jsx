@@ -5,10 +5,24 @@ import PricingCard from '@/components/PricingCard';
 import TrendingTopics from '@/components/TrendingTopics';
 import WhoToFollow from '@/components/WhoToFollow';
 import NotificationSystem from '@/components/NotificationSystem';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import { useTheme } from 'next-themes';
+import { useState, useEffect } from 'react';
 
 const Layout = ({ children }) => {
+  const [mounted, setMounted] = useState(false);
+  const { theme, setTheme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <LoadingSpinner />;
+  }
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`min-h-screen bg-background ${theme === 'dark' ? 'dark' : ''}`}>
       <NavBar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-6">

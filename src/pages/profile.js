@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useUser } from '@/context/UserContext';
 import useToast from '@/hooks/useToast';
 import { faker } from '@faker-js/faker';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 const Profile = () => {
   const { user, login } = useUser();
@@ -22,20 +23,37 @@ const Profile = () => {
   const [replies, setReplies] = useState([]);
   const [media, setMedia] = useState([]);
   const [likes, setLikes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { showToast } = useToast();
 
   useEffect(() => {
-    if (user) {
-      setName(user.name);
-      setBio(user.bio || '');
-      setFollowers(faker.number.int({ min: 100, max: 10000 }));
-      setFollowing(faker.number.int({ min: 50, max: 1000 }));
-      setPosts(generateMockPosts(20));
-      setReplies(generateMockPosts(10));
-      setMedia(generateMockMedia(15));
-      setLikes(generateMockPosts(25));
-    }
-  }, [user]);
+    const fetchProfileData = async () => {
+      try {
+        setLoading(true);
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        if (user) {
+          setName(user.name);
+          setBio(user.bio || '');
+          setFollowers(faker.number.int({ min: 100, max: 10000 }));
+          setFollowing(faker.number.int({ min: 50, max: 1000 }));
+          setPosts(generateMockPosts(20));
+          setReplies(generateMockPosts(10));
+          setMedia(generateMockMedia(15));
+          setLikes(generateMockPosts(25));
+        }
+        setError(null);
+      } catch (err) {
+        setError('Failed to fetch profile data. Please try again.');
+        showToast("Error", "Failed to fetch profile data. Please try again.", "destructive");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, [user, showToast]);
 
   const generateMockPosts = (count) => {
     return Array.from({ length: count }, () => ({
@@ -67,6 +85,26 @@ const Profile = () => {
     setIsEditing(false);
     showToast("Success", "Profile updated successfully!", "default");
   };
+
+  if (loading) {
+    return (
+      <Layout>
+        <LoadingSpinner />
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Error</h1>
+          <p className="text-red-500 mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
