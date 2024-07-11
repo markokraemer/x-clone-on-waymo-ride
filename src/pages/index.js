@@ -1,24 +1,46 @@
-import { Button } from "@/components/ui/button"
+import Layout from '@/components/Layout';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2">
-      <main className="flex flex-col items-center justify-center w-full flex-1 px-20 text-center">
-        <h1 className="text-6xl font-bold">
-          Welcome to your App
-        </h1>
-
-        <p className="mt-3 text-2xl">
-          Get started by editing{' '}
-          <code className="p-3 font-mono text-lg bg-gray-100 rounded-md">
-            pages/index.js
-          </code>
-        </p>
-
-        <div className="flex flex-wrap items-center justify-around max-w-4xl mt-6 sm:w-full">
-          <Button className="mt-4">Hello World</Button>
+    <Layout>
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)]">
+        <h1 className="text-5xl font-bold mb-6">Welcome to X49</h1>
+        <p className="text-2xl mb-8">The everything app for just $49</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <Card>
+            <CardHeader>
+              <CardTitle>Social</CardTitle>
+              <CardDescription>Connect with friends and share your thoughts</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full">Explore Feed</Button>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Messaging</CardTitle>
+              <CardDescription>Instant messaging with anyone, anywhere</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full">Start Chatting</Button>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Payments</CardTitle>
+              <CardDescription>Send and receive money effortlessly</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full">Manage Finances</Button>
+            </CardContent>
+          </Card>
         </div>
-      </main>
-    </div>
-  )
+        <Button size="lg" className="text-xl px-8 py-6">
+          Get Started for $49
+        </Button>
+      </div>
+    </Layout>
+  );
 }
