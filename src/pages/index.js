@@ -1,20 +1,17 @@
+import { useState } from 'react';
 import Layout from '@/components/Layout';
 import Feed from '@/components/Feed';
-import TrendingTopics from '@/components/TrendingTopics';
-import WhoToFollow from '@/components/WhoToFollow';
+import ComposeButton from '@/components/ComposeButton';
+import ComposeModal from '@/components/ComposeModal';
 
 export default function Home() {
+  const [isComposeModalOpen, setIsComposeModalOpen] = useState(false);
+
   return (
     <Layout>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2">
-          <Feed />
-        </div>
-        <div className="space-y-6">
-          <TrendingTopics />
-          <WhoToFollow />
-        </div>
-      </div>
+      <Feed />
+      <ComposeButton onClick={() => setIsComposeModalOpen(true)} />
+      <ComposeModal isOpen={isComposeModalOpen} onClose={() => setIsComposeModalOpen(false)} />
     </Layout>
   );
 }
