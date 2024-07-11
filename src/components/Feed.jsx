@@ -44,7 +44,7 @@ const PostCard = React.memo(({ post, onAction, onRepost }) => {
               {hashtags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-2">
                   {hashtags.map((tag, index) => (
-                    <span key={`${post.id}-${index}`} className="text-primary text-sm">
+                    <span key={`${post.id}-${tag}-${index}`} className="text-primary text-sm">
                       <Hash className="inline-block w-3 h-3 mr-1" />
                       {tag.slice(1)}
                     </span>
