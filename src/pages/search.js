@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import Layout from '@/components/Layout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -6,34 +7,75 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search as SearchIcon, User } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import api from '@/lib/api';
+import { faker } from '@faker-js/faker';
+
+const generateMockPosts = (count) => {
+  return Array.from({ length: count }, () => ({
+    id: faker.string.uuid(),
+    content: faker.lorem.sentence(),
+    user: {
+      name: faker.person.fullName(),
+      handle: faker.internet.userName(),
+      avatar: faker.image.avatar(),
+    },
+  }));
+};
+
+const generateMockUsers = (count) => {
+  return Array.from({ length: count }, () => ({
+    id: faker.string.uuid(),
+    name: faker.person.fullName(),
+    handle: faker.internet.userName(),
+    avatar: faker.image.avatar(),
+  }));
+};
 
 const Search = () => {
+  const router = useRouter();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState({ posts: [], users: [] });
   const [activeTab, setActiveTab] = useState('posts');
   const [loading, setLoading] = useState(false);
 
-  const handleSearch = async (e) => {
+  useEffect(() => {
+    if (router.query.q) {
+      setQuery(router.query.q);
+      handleSearch(router.query.q);
+    }
+  }, [router.query.q]);
+
+  const handleSearch = async (searchQuery) => {
+    setLoading(true);
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    const postResults = generateMockPosts(5).filter(post => 
+      post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.user.handle.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    
+    const userResults = generateMockUsers(5).filter(user => 
+      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.handle.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    
+    setResults({ posts: postResults, users: userResults });
+    setLoading(false);
+  };
+
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (query.trim()) {
-      setLoading(true);
-      try {
-        const postResults = await api.searchPosts(query);
-        const userResults = await api.searchUsers(query);
-        setResults({ posts: postResults, users: userResults });
-        setLoading(false);
-      } catch (error) {
-        console.error('Search failed:', error);
-        setLoading(false);
-      }
+      router.push(`/search?q=${encodeURIComponent(query)}`, undefined, { shallow: true });
+      handleSearch(query);
     }
   };
 
   return (
     <Layout>
       <h1 className="text-2xl font-bold mb-4">Search</h1>
-      <form onSubmit={handleSearch} className="mb-6">
+      <form onSubmit={handleSubmit} className="mb-6">
         <div className="flex">
           <Input
             type="text"

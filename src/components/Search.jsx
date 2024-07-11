@@ -2,21 +2,14 @@ import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search as SearchIcon } from 'lucide-react';
-import api from '@/lib/api';
 
-const Search = () => {
+const Search = ({ onSearch }) => {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
 
-  const handleSearch = async (e) => {
+  const handleSearch = (e) => {
     e.preventDefault();
     if (query.trim()) {
-      try {
-        const searchResults = await api.searchPosts(query);
-        setResults(searchResults);
-      } catch (error) {
-        console.error('Search failed:', error);
-      }
+      onSearch(query);
     }
   };
 

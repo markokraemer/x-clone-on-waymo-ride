@@ -6,6 +6,8 @@ import Logo from '@/components/Logo';
 import Search from '@/components/Search';
 import { useUser } from '@/context/UserContext';
 import { Home, MessageSquare, Bell, Settings } from 'lucide-react';
+import DarkModeToggle from '@/components/DarkModeToggle';
+import NotificationCenter from '@/components/NotificationCenter';
 
 const NavBar = () => {
   const router = useRouter();
@@ -14,6 +16,10 @@ const NavBar = () => {
   const handleLogout = () => {
     logout();
     router.push('/login');
+  };
+
+  const handleSearch = (query) => {
+    router.push(`/search?q=${encodeURIComponent(query)}`);
   };
 
   return (
@@ -26,7 +32,7 @@ const NavBar = () => {
           </Link>
           <div className="flex items-center space-x-4">
             <div className="hidden md:block w-64">
-              <Search />
+              <Search onSearch={handleSearch} />
             </div>
             <Link href="/" passHref>
               <Button variant={router.pathname === '/' ? 'default' : 'ghost'} size="icon">
@@ -38,9 +44,7 @@ const NavBar = () => {
                 <MessageSquare className="h-5 w-5" />
               </Button>
             </Link>
-            <Button variant="ghost" size="icon">
-              <Bell className="h-5 w-5" />
-            </Button>
+            <NotificationCenter />
             {user ? (
               <>
                 <Link href="/settings" passHref>
@@ -65,6 +69,7 @@ const NavBar = () => {
                 </Link>
               </>
             )}
+            <DarkModeToggle />
           </div>
         </div>
       </div>
