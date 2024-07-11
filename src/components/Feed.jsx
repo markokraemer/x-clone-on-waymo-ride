@@ -8,6 +8,7 @@ import { useUser } from '@/context/UserContext';
 import { useInView } from 'react-intersection-observer';
 import useToast from '@/hooks/useToast';
 import { motion } from 'framer-motion';
+import LoadingSkeleton from '@/components/LoadingSkeleton';
 import api from '@/lib/api';
 
 const PostCard = React.memo(({ post, onAction }) => (
@@ -212,8 +213,16 @@ const Feed = React.forwardRef(({ userOnly = false, onNewPost }, ref) => {
           </CardContent>
         </Card>
       )}
-      {memoizedPosts}
-      {loading && <div className="text-center py-4">Loading more posts...</div>}
+      {loading && !posts.length ? (
+        <>
+          <LoadingSkeleton />
+          <LoadingSkeleton />
+          <LoadingSkeleton />
+        </>
+      ) : (
+        memoizedPosts
+      )}
+      {loading && posts.length > 0 && <LoadingSkeleton />}
       <div ref={inViewRef} style={{ height: '10px' }}></div>
     </div>
   );
