@@ -2,6 +2,7 @@ import NavBar from '@/components/NavBar';
 import Sidebar from '@/components/Sidebar';
 import { Card, CardContent } from '@/components/ui/card';
 import PricingCard from '@/components/PricingCard';
+import NotificationCenter from '@/components/NotificationCenter';
 
 const Layout = ({ children }) => {
   return (
@@ -18,6 +19,7 @@ const Layout = ({ children }) => {
             </CardContent>
           </Card>
           <div className="lg:w-80 space-y-6">
+            <NotificationCenter />
             <PricingCard />
             <Card>
               <CardContent className="p-4">
