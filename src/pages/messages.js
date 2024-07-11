@@ -31,7 +31,7 @@ const Messages = () => {
   return (
     <Layout>
       <div className="flex h-[calc(100vh-4rem)]">
-        <Card className="w-1/3 mr-4">
+        <Card className="w-1/3 mr-4 overflow-hidden">
           <CardHeader>
             <CardTitle>Conversations</CardTitle>
           </CardHeader>
@@ -48,8 +48,8 @@ const Messages = () => {
                       <AvatarImage src={conv.user.avatar} alt={conv.user.name} />
                       <AvatarFallback>{conv.user.name[0]}</AvatarFallback>
                     </Avatar>
-                    <div>
-                      <h3 className="text-sm font-medium">{conv.user.name}</h3>
+                    <div className="overflow-hidden">
+                      <h3 className="text-sm font-medium truncate">{conv.user.name}</h3>
                       <p className="text-sm text-muted-foreground truncate">{conv.lastMessage}</p>
                     </div>
                   </div>

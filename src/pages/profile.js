@@ -45,6 +45,11 @@ const Profile = () => {
       comments: faker.number.int({ min: 0, max: 100 }),
       reposts: faker.number.int({ min: 0, max: 50 }),
       timestamp: faker.date.recent(),
+      user: {
+        name: user?.name || faker.person.fullName(),
+        handle: user?.handle || faker.internet.userName(),
+        avatar: user?.avatar || faker.image.avatar(),
+      },
     }));
   };
 
@@ -56,17 +61,6 @@ const Profile = () => {
       timestamp: faker.date.recent(),
     }));
   };
-
-  if (!user) {
-    return (
-      <Layout>
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Please log in to view your profile</h1>
-          <Button>Log In</Button>
-        </div>
-      </Layout>
-    );
-  }
 
   const handleSave = () => {
     login({ ...user, name, bio });
@@ -80,8 +74,8 @@ const Profile = () => {
         <CardContent className="pt-6">
           <div className="flex flex-col items-center sm:flex-row sm:items-start">
             <Avatar className="h-24 w-24 mb-4 sm:mb-0 sm:mr-6">
-              <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback>{user.name[0]}</AvatarFallback>
+              <AvatarImage src={user?.avatar} alt={user?.name} />
+              <AvatarFallback>{user?.name[0]}</AvatarFallback>
             </Avatar>
             <div className="text-center sm:text-left flex-grow">
               {isEditing ? (
@@ -104,9 +98,9 @@ const Profile = () => {
                 </div>
               ) : (
                 <>
-                  <h1 className="text-2xl font-bold">{user.name}</h1>
-                  <p className="text-muted-foreground">{user.handle}</p>
-                  <p className="mt-2">{user.bio}</p>
+                  <h1 className="text-2xl font-bold">{user?.name}</h1>
+                  <p className="text-muted-foreground">{user?.handle}</p>
+                  <p className="mt-2">{user?.bio}</p>
                   <div className="mt-4 flex justify-center sm:justify-start space-x-4">
                     <span><strong>{followers.toLocaleString()}</strong> Followers</span>
                     <span><strong>{following.toLocaleString()}</strong> Following</span>
