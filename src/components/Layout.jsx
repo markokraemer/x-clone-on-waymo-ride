@@ -5,6 +5,7 @@ import PricingCard from '@/components/PricingCard';
 import NotificationCenter from '@/components/NotificationCenter';
 import TrendingTopics from '@/components/TrendingTopics';
 import DarkModeToggle from '@/components/DarkModeToggle';
+import NotificationSystem from '@/components/NotificationSystem';
 
 const Layout = ({ children }) => {
   return (
@@ -38,6 +39,7 @@ const Layout = ({ children }) => {
           </div>
         </div>
       </div>
+      <NotificationSystem />
     </div>
   );
 };

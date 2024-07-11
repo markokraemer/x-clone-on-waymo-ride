@@ -8,6 +8,7 @@ import { useUser } from '@/context/UserContext';
 import { Home, MessageSquare, Bell, Settings } from 'lucide-react';
 import DarkModeToggle from '@/components/DarkModeToggle';
 import NotificationCenter from '@/components/NotificationCenter';
+import { Badge } from '@/components/ui/badge';
 
 const NavBar = () => {
   const router = useRouter();

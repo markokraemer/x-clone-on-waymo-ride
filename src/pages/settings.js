@@ -7,18 +7,33 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import useToast from '@/hooks/useToast';
 
 const Settings = () => {
-  const { user, login } = useUser();
+  const { user, updateUser } = useUser();
   const [name, setName] = useState(user?.name || '');
   const [bio, setBio] = useState(user?.bio || '');
-  const [notifications, setNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
+  const [notifications, setNotifications] = useState(user?.preferences?.notifications || true);
+  const [darkMode, setDarkMode] = useState(user?.preferences?.darkMode || false);
+  const [emailNotifications, setEmailNotifications] = useState(user?.preferences?.emailNotifications || true);
+  const [pushNotifications, setPushNotifications] = useState(user?.preferences?.pushNotifications || true);
+  const { showToast } = useToast();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    login({ ...user, name, bio });
-    // In a real app, you would send this to your backend
+    updateUser({
+      ...user,
+      name,
+      bio,
+      preferences: {
+        ...user.preferences,
+        notifications,
+        darkMode,
+        emailNotifications,
+        pushNotifications,
+      },
+    });
+    showToast("Success", "Settings updated successfully!", "default");
   };
 
   return (
@@ -65,6 +80,22 @@ const Settings = () => {
                   id="notifications"
                   checked={notifications}
                   onCheckedChange={setNotifications}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="emailNotifications">Email Notifications</Label>
+                <Switch
+                  id="emailNotifications"
+                  checked={emailNotifications}
+                  onCheckedChange={setEmailNotifications}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="pushNotifications">Push Notifications</Label>
+                <Switch
+                  id="pushNotifications"
+                  checked={pushNotifications}
+                  onCheckedChange={setPushNotifications}
                 />
               </div>
               <div className="flex items-center justify-between">
