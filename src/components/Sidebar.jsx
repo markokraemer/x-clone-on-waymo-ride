@@ -33,7 +33,7 @@ const Sidebar = () => {
         ))}
       </nav>
       <div className="mt-auto">
-        <Button className="w-full" size="lg">
+        <Button className="w-full" size="lg" onClick={() => router.push('/checkout')}>
           <DollarSign className="h-5 w-5 mr-2" />
           Upgrade to Pro
         </Button>

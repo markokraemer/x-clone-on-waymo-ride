@@ -23,10 +23,6 @@ const Layout = ({ children }) => {
             </CardContent>
           </Card>
           <div className="lg:w-80 space-y-6">
-            <div className="flex justify-end mb-4">
-              <DarkModeToggle />
-            </div>
-            <NotificationCenter />
             <TrendingTopics />
             <WhoToFollow />
             <PricingCard />

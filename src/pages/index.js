@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useRouter } from 'next/router';
 import Layout from '@/components/Layout';
 import Feed from '@/components/Feed';
 import ComposeButton from '@/components/ComposeButton';
@@ -7,12 +8,14 @@ import TrendingTopics from '@/components/TrendingTopics';
 import { useUser } from '@/context/UserContext';
 import useToast from '@/hooks/useToast';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 export default function Home() {
   const [isComposeModalOpen, setIsComposeModalOpen] = useState(false);
   const { user } = useUser();
   const feedRef = useRef();
   const { showToast } = useToast();
+  const router = useRouter();
 
   const handleNewPost = (newPost) => {
     setIsComposeModalOpen(false);
