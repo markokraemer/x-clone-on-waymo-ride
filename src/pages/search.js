@@ -4,7 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search as SearchIcon } from 'lucide-react';
+import { Search as SearchIcon, User } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import api from '@/lib/api';
 
 const Search = () => {
@@ -18,8 +19,9 @@ const Search = () => {
     if (query.trim()) {
       setLoading(true);
       try {
-        const searchResults = await api.searchPosts(query);
-        setResults({ posts: searchResults, users: [] }); // For now, we're only searching posts
+        const postResults = await api.searchPosts(query);
+        const userResults = await api.searchUsers(query);
+        setResults({ posts: postResults, users: userResults });
         setLoading(false);
       } catch (error) {
         console.error('Search failed:', error);
@@ -54,7 +56,7 @@ const Search = () => {
         </TabsList>
         <TabsContent value="posts">
           {loading ? (
-            <p>Searching...</p>
+            <p>Searching posts...</p>
           ) : (
             results.posts.map((post) => (
               <Card key={post.id} className="mb-4">
@@ -68,7 +70,24 @@ const Search = () => {
           )}
         </TabsContent>
         <TabsContent value="users">
-          <p>User search not implemented yet.</p>
+          {loading ? (
+            <p>Searching users...</p>
+          ) : (
+            results.users.map((user) => (
+              <Card key={user.id} className="mb-4">
+                <CardContent className="p-4 flex items-center">
+                  <Avatar className="h-12 w-12 mr-4">
+                    <AvatarImage src={user.avatar} alt={user.name} />
+                    <AvatarFallback><User /></AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-semibold">{user.name}</p>
+                    <p className="text-sm text-muted-foreground">{user.handle}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
         </TabsContent>
       </Tabs>
     </Layout>
