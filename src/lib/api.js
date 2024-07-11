@@ -21,73 +21,102 @@ const simulateErrorChance = () => {
   }
 };
 
+const handleApiError = (error) => {
+  console.error('API Error:', error);
+  throw new Error('An unexpected error occurred. Please try again.');
+};
+
 export const api = {
   getPosts: async (page = 1, limit = 10) => {
-    await simulateNetworkDelay();
-    simulateErrorChance();
-    const start = (page - 1) * limit;
-    const end = start + limit;
-    return posts.slice(start, end).map(post => ({...post, id: generateUniqueId()}));
+    try {
+      await simulateNetworkDelay();
+      simulateErrorChance();
+      const start = (page - 1) * limit;
+      const end = start + limit;
+      return posts.slice(start, end).map(post => ({...post, id: generateUniqueId()}));
+    } catch (error) {
+      handleApiError(error);
+    }
   },
 
   createPost: async (content, user) => {
-    await simulateNetworkDelay();
-    simulateErrorChance();
-    const newPost = {
-      id: generateUniqueId(),
-      user,
-      content,
-      likes: 0,
-      comments: 0,
-      reposts: 0,
-      timestamp: new Date().toISOString(),
-    };
-    posts.unshift(newPost);
-    return newPost;
+    try {
+      await simulateNetworkDelay();
+      simulateErrorChance();
+      const newPost = {
+        id: generateUniqueId(),
+        user,
+        content,
+        likes: 0,
+        comments: 0,
+        reposts: 0,
+        timestamp: new Date().toISOString(),
+      };
+      posts.unshift(newPost);
+      return newPost;
+    } catch (error) {
+      handleApiError(error);
+    }
   },
 
   likePost: async (postId) => {
-    await simulateNetworkDelay();
-    simulateErrorChance();
-    const post = posts.find(p => p.id === postId);
-    if (post) {
-      post.likes += 1;
-      return post;
+    try {
+      await simulateNetworkDelay();
+      simulateErrorChance();
+      const post = posts.find(p => p.id === postId);
+      if (post) {
+        post.likes += 1;
+        return post;
+      }
+      throw new Error('Post not found');
+    } catch (error) {
+      handleApiError(error);
     }
-    throw new Error('Post not found');
   },
 
   commentOnPost: async (postId, comment) => {
-    await simulateNetworkDelay();
-    simulateErrorChance();
-    const post = posts.find(p => p.id === postId);
-    if (post) {
-      post.comments += 1;
-      // In a real app, you'd store the comment content as well
-      return post;
+    try {
+      await simulateNetworkDelay();
+      simulateErrorChance();
+      const post = posts.find(p => p.id === postId);
+      if (post) {
+        post.comments += 1;
+        // In a real app, you'd store the comment content as well
+        return post;
+      }
+      throw new Error('Post not found');
+    } catch (error) {
+      handleApiError(error);
     }
-    throw new Error('Post not found');
   },
 
   repostPost: async (postId) => {
-    await simulateNetworkDelay();
-    simulateErrorChance();
-    const post = posts.find(p => p.id === postId);
-    if (post) {
-      post.reposts += 1;
-      return post;
+    try {
+      await simulateNetworkDelay();
+      simulateErrorChance();
+      const post = posts.find(p => p.id === postId);
+      if (post) {
+        post.reposts += 1;
+        return post;
+      }
+      throw new Error('Post not found');
+    } catch (error) {
+      handleApiError(error);
     }
-    throw new Error('Post not found');
   },
 
   searchPosts: async (query) => {
-    await simulateNetworkDelay();
-    simulateErrorChance();
-    return posts.filter(post => 
-      post.content.toLowerCase().includes(query.toLowerCase()) ||
-      post.user.name.toLowerCase().includes(query.toLowerCase()) ||
-      post.user.handle.toLowerCase().includes(query.toLowerCase())
-    ).map(post => ({...post, id: generateUniqueId()}));
+    try {
+      await simulateNetworkDelay();
+      simulateErrorChance();
+      return posts.filter(post => 
+        post.content.toLowerCase().includes(query.toLowerCase()) ||
+        post.user.name.toLowerCase().includes(query.toLowerCase()) ||
+        post.user.handle.toLowerCase().includes(query.toLowerCase())
+      ).map(post => ({...post, id: generateUniqueId()}));
+    } catch (error) {
+      handleApiError(error);
+    }
   },
 };
 

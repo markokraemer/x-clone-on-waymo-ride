@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const UserContext = createContext();
 
@@ -7,15 +7,24 @@ export const UserProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for saved user in localStorage
-    const savedUser = localStorage.getItem('x49_user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-    setLoading(false);
+    const loadUser = async () => {
+      try {
+        // Check for saved user in localStorage
+        const savedUser = localStorage.getItem('x49_user');
+        if (savedUser) {
+          setUser(JSON.parse(savedUser));
+        }
+      } catch (error) {
+        console.error('Error loading user:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUser();
   }, []);
 
-  const login = (userData) => {
+  const login = useCallback((userData) => {
     const newUser = {
       ...userData,
       preferences: {
@@ -26,29 +35,34 @@ export const UserProvider = ({ children }) => {
     };
     setUser(newUser);
     localStorage.setItem('x49_user', JSON.stringify(newUser));
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
     localStorage.removeItem('x49_user');
-  };
+  }, []);
 
-  const updateUser = (updatedUserData) => {
-    setUser(updatedUserData);
-    localStorage.setItem('x49_user', JSON.stringify(updatedUserData));
-  };
+  const updateUser = useCallback((updatedUserData) => {
+    setUser(prevUser => {
+      const newUser = { ...prevUser, ...updatedUserData };
+      localStorage.setItem('x49_user', JSON.stringify(newUser));
+      return newUser;
+    });
+  }, []);
 
-  const updatePreferences = (newPreferences) => {
-    const updatedUser = {
-      ...user,
-      preferences: {
-        ...user.preferences,
-        ...newPreferences,
-      },
-    };
-    setUser(updatedUser);
-    localStorage.setItem('x49_user', JSON.stringify(updatedUser));
-  };
+  const updatePreferences = useCallback((newPreferences) => {
+    setUser(prevUser => {
+      const updatedUser = {
+        ...prevUser,
+        preferences: {
+          ...prevUser.preferences,
+          ...newPreferences,
+        },
+      };
+      localStorage.setItem('x49_user', JSON.stringify(updatedUser));
+      return updatedUser;
+    });
+  }, []);
 
   return (
     <UserContext.Provider value={{ user, loading, login, logout, updateUser, updatePreferences }}>
