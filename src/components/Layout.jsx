@@ -2,11 +2,9 @@ import NavBar from '@/components/NavBar';
 import Sidebar from '@/components/Sidebar';
 import { Card, CardContent } from '@/components/ui/card';
 import PricingCard from '@/components/PricingCard';
-import NotificationCenter from '@/components/NotificationCenter';
 import TrendingTopics from '@/components/TrendingTopics';
-import DarkModeToggle from '@/components/DarkModeToggle';
-import NotificationSystem from '@/components/NotificationSystem';
 import WhoToFollow from '@/components/WhoToFollow';
+import NotificationSystem from '@/components/NotificationSystem';
 
 const Layout = ({ children }) => {
   return (
