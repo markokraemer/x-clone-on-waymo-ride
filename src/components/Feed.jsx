@@ -6,6 +6,7 @@ import { Heart, MessageCircle, Repeat, Share2 } from 'lucide-react';
 import UserAvatar from '@/components/UserAvatar';
 import { useUser } from '@/context/UserContext';
 import { useInView } from 'react-intersection-observer';
+import api from '@/lib/api';
 
 const Feed = ({ userOnly = false }) => {
   const { user } = useUser();
@@ -24,12 +25,9 @@ const Feed = ({ userOnly = false }) => {
     if (!hasMore) return;
     setLoading(true);
     try {
-      // In a real app, this would be an API call with pagination
-      const response = await new Promise(resolve => 
-        setTimeout(() => resolve(dummyPosts.slice((page - 1) * 10, page * 10)), 1000)
-      );
-      setPosts(prevPosts => [...prevPosts, ...response]);
-      setHasMore(response.length === 10);
+      const newPosts = await api.getPosts(page);
+      setPosts(prevPosts => [...prevPosts, ...newPosts]);
+      setHasMore(newPosts.length === 10);
       setPage(prevPage => prevPage + 1);
       setError(null);
     } catch (err) {
@@ -52,24 +50,37 @@ const Feed = ({ userOnly = false }) => {
   const handlePostSubmit = async (e) => {
     e.preventDefault();
     if (newPost.trim()) {
-      const post = {
-        id: Date.now(),
-        user: { name: user.name, handle: user.handle },
-        content: newPost,
-        likes: 0,
-        comments: 0,
-        reposts: 0,
-      };
-      setPosts([post, ...posts]);
-      setNewPost('');
-      // In a real app, you would send this to your backend
+      try {
+        const post = await api.createPost(newPost, user);
+        setPosts([post, ...posts]);
+        setNewPost('');
+      } catch (err) {
+        setError('Failed to create post. Please try again.');
+      }
     }
   };
 
-  const handleAction = (postId, action) => {
-    setPosts(posts.map(post => 
-      post.id === postId ? { ...post, [action]: post[action] + 1 } : post
-    ));
+  const handleAction = async (postId, action) => {
+    try {
+      let updatedPost;
+      switch (action) {
+        case 'likes':
+          updatedPost = await api.likePost(postId);
+          break;
+        case 'comments':
+          // For simplicity, we're not implementing a full comment system here
+          updatedPost = await api.commentOnPost(postId, 'A new comment');
+          break;
+        case 'reposts':
+          updatedPost = await api.repostPost(postId);
+          break;
+        default:
+          return;
+      }
+      setPosts(posts.map(post => post.id === postId ? updatedPost : post));
+    } catch (err) {
+      setError(`Failed to ${action} post. Please try again.`);
+    }
   };
 
   if (error) return <div>{error}</div>;
@@ -132,10 +143,5 @@ const Feed = ({ userOnly = false }) => {
     </div>
   );
 };
-
-const dummyPosts = [
-  // ... (previous dummy posts)
-  // Add more dummy posts here to simulate pagination
-];
 
 export default Feed;

@@ -1,17 +1,19 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import UserAvatar from '@/components/UserAvatar';
 import Logo from '@/components/Logo';
-import { Home, MessageSquare, Bell, Settings, Search } from 'lucide-react';
+import Search from '@/components/Search';
+import { useUser } from '@/context/UserContext';
+import { Home, MessageSquare, Bell, Settings } from 'lucide-react';
 
 const NavBar = () => {
   const router = useRouter();
+  const { user, logout } = useUser();
 
-  const user = {
-    name: 'John Doe',
-    avatar: '/avatar.png',
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
   };
 
   return (
@@ -23,13 +25,8 @@ const NavBar = () => {
             <span className="ml-2 text-2xl font-bold text-primary">X49</span>
           </Link>
           <div className="flex items-center space-x-4">
-            <div className="hidden md:flex items-center relative">
-              <Search className="h-5 w-5 text-muted-foreground absolute left-3" />
-              <Input
-                type="text"
-                placeholder="Search X49"
-                className="w-64 pl-10"
-              />
+            <div className="hidden md:block w-64">
+              <Search />
             </div>
             <Link href="/" passHref>
               <Button variant={router.pathname === '/' ? 'default' : 'ghost'} size="icon">
@@ -44,16 +41,30 @@ const NavBar = () => {
             <Button variant="ghost" size="icon">
               <Bell className="h-5 w-5" />
             </Button>
-            <Link href="/settings" passHref>
-              <Button variant={router.pathname === '/settings' ? 'default' : 'ghost'} size="icon">
-                <Settings className="h-5 w-5" />
-              </Button>
-            </Link>
-            <Link href="/profile" passHref>
-              <Button variant="ghost" size="icon">
-                <UserAvatar user={user} size="sm" />
-              </Button>
-            </Link>
+            {user ? (
+              <>
+                <Link href="/settings" passHref>
+                  <Button variant={router.pathname === '/settings' ? 'default' : 'ghost'} size="icon">
+                    <Settings className="h-5 w-5" />
+                  </Button>
+                </Link>
+                <Link href="/profile" passHref>
+                  <Button variant="ghost" size="icon">
+                    <UserAvatar user={user} size="sm" />
+                  </Button>
+                </Link>
+                <Button onClick={handleLogout} variant="outline">Logout</Button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" passHref>
+                  <Button variant="outline">Login</Button>
+                </Link>
+                <Link href="/signup" passHref>
+                  <Button>Sign Up</Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
