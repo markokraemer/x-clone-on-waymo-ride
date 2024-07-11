@@ -5,10 +5,9 @@ import UserAvatar from '@/components/UserAvatar';
 import Logo from '@/components/Logo';
 import Search from '@/components/Search';
 import { useUser } from '@/context/UserContext';
-import { Home, MessageSquare, Bell, Settings } from 'lucide-react';
+import { Home, MessageSquare, Bell, Settings, User } from 'lucide-react';
 import DarkModeToggle from '@/components/DarkModeToggle';
 import NotificationCenter from '@/components/NotificationCenter';
-import { Badge } from '@/components/ui/badge';
 
 const NavBar = () => {
   const router = useRouter();

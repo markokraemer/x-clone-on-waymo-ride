@@ -5,6 +5,7 @@ import Feed from '@/components/Feed';
 import ComposeButton from '@/components/ComposeButton';
 import ComposeModal from '@/components/ComposeModal';
 import TrendingTopics from '@/components/TrendingTopics';
+import WhoToFollow from '@/components/WhoToFollow';
 import { useUser } from '@/context/UserContext';
 import useToast from '@/hooks/useToast';
 import { Card, CardContent } from '@/components/ui/card';
@@ -33,6 +34,7 @@ export default function Home() {
         </div>
         <div className="space-y-6">
           <TrendingTopics />
+          <WhoToFollow />
           <Card>
             <CardContent className="p-4">
               <h2 className="text-xl font-semibold mb-2">Upgrade to X49 Pro</h2>

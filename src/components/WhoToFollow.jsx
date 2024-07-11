@@ -1,14 +1,32 @@
+import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import UserAvatar from '@/components/UserAvatar';
+import { faker } from '@faker-js/faker';
 
-const suggestedUsers = [
-  { id: 1, name: 'Alice Johnson', handle: '@alice', followers: '10K' },
-  { id: 2, name: 'Bob Smith', handle: '@bobsmith', followers: '5K' },
-  { id: 3, name: 'Carol White', handle: '@carol', followers: '8K' },
-];
+const generateSuggestedUsers = (count) => {
+  return Array.from({ length: count }, () => ({
+    id: faker.string.uuid(),
+    name: faker.person.fullName(),
+    handle: faker.internet.userName().toLowerCase(),
+    followers: faker.number.int({ min: 1000, max: 100000 }),
+  }));
+};
 
 const WhoToFollow = () => {
+  const [suggestedUsers, setSuggestedUsers] = useState([]);
+
+  useEffect(() => {
+    setSuggestedUsers(generateSuggestedUsers(3));
+  }, []);
+
+  const handleFollow = (userId) => {
+    // In a real app, you would call an API to follow the user
+    console.log(`Following user with id: ${userId}`);
+    // For now, let's just remove the user from the suggestions
+    setSuggestedUsers(suggestedUsers.filter(user => user.id !== userId));
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -22,10 +40,10 @@ const WhoToFollow = () => {
                 <UserAvatar user={user} />
                 <div>
                   <p className="font-medium">{user.name}</p>
-                  <p className="text-sm text-muted-foreground">{user.handle}</p>
+                  <p className="text-sm text-muted-foreground">@{user.handle}</p>
                 </div>
               </div>
-              <Button variant="outline" size="sm">Follow</Button>
+              <Button variant="outline" size="sm" onClick={() => handleFollow(user.id)}>Follow</Button>
             </li>
           ))}
         </ul>
