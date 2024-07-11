@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
 import { useUser } from '@/context/UserContext';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useToast from '@/hooks/useToast';
 
 const Settings = () => {
@@ -17,7 +18,22 @@ const Settings = () => {
   const [darkMode, setDarkMode] = useState(user?.preferences?.darkMode || false);
   const [emailNotifications, setEmailNotifications] = useState(user?.preferences?.emailNotifications || true);
   const [pushNotifications, setPushNotifications] = useState(user?.preferences?.pushNotifications || true);
+  const [language, setLanguage] = useState(user?.preferences?.language || 'en');
+  const [privacyLevel, setPrivacyLevel] = useState(user?.preferences?.privacyLevel || 'public');
   const { showToast } = useToast();
+
+  useEffect(() => {
+    if (user) {
+      setName(user.name);
+      setBio(user.bio || '');
+      setNotifications(user.preferences?.notifications || true);
+      setDarkMode(user.preferences?.darkMode || false);
+      setEmailNotifications(user.preferences?.emailNotifications || true);
+      setPushNotifications(user.preferences?.pushNotifications || true);
+      setLanguage(user.preferences?.language || 'en');
+      setPrivacyLevel(user.preferences?.privacyLevel || 'public');
+    }
+  }, [user]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -31,6 +47,8 @@ const Settings = () => {
         darkMode,
         emailNotifications,
         pushNotifications,
+        language,
+        privacyLevel,
       },
     });
     showToast("Success", "Settings updated successfully!", "default");
@@ -105,6 +123,33 @@ const Settings = () => {
                   checked={darkMode}
                   onCheckedChange={setDarkMode}
                 />
+              </div>
+              <div>
+                <Label htmlFor="language">Language</Label>
+                <Select value={language} onValueChange={setLanguage}>
+                  <SelectTrigger id="language">
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="es">Español</SelectItem>
+                    <SelectItem value="fr">Français</SelectItem>
+                    <SelectItem value="de">Deutsch</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="privacyLevel">Privacy Level</Label>
+                <Select value={privacyLevel} onValueChange={setPrivacyLevel}>
+                  <SelectTrigger id="privacyLevel">
+                    <SelectValue placeholder="Select privacy level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="public">Public</SelectItem>
+                    <SelectItem value="private">Private</SelectItem>
+                    <SelectItem value="friends">Friends Only</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </CardContent>
