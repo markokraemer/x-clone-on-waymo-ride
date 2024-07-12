@@ -8,12 +8,10 @@ import NotificationSystem from '@/components/NotificationSystem';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { useTheme } from 'next-themes';
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Moon, Sun } from 'lucide-react';
 
 const Layout = ({ children }) => {
   const [mounted, setMounted] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const { theme } = useTheme();
 
   useEffect(() => {
     setMounted(true);
@@ -22,10 +20,6 @@ const Layout = ({ children }) => {
   if (!mounted) {
     return <LoadingSpinner />;
   }
-
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-  };
 
   return (
     <div className={`min-h-screen bg-background ${theme === 'dark' ? 'dark' : ''}`}>
@@ -57,10 +51,6 @@ const Layout = ({ children }) => {
                   </p>
                 </CardContent>
               </Card>
-              <Button onClick={toggleTheme} variant="outline" className="w-full mt-6">
-                {theme === 'dark' ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
-                {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-              </Button>
             </div>
           </div>
         </div>

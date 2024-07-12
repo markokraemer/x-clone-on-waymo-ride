@@ -5,17 +5,23 @@ import UserAvatar from '@/components/UserAvatar';
 import Logo from '@/components/Logo';
 import SearchBar from '@/components/SearchBar';
 import { useUser } from '@/context/UserContext';
-import { Home, MessageSquare, Bell, Settings, User, Menu } from 'lucide-react';
+import { Home, MessageSquare, Bell, Settings, User, Menu, Moon, Sun } from 'lucide-react';
 import { useState } from 'react';
+import { useTheme } from 'next-themes';
 
 const NavBar = () => {
   const router = useRouter();
   const { user, logout } = useUser();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   const handleLogout = () => {
     logout();
     router.push('/login');
+  };
+
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
   const navItems = [
@@ -48,6 +54,9 @@ const NavBar = () => {
                 </Button>
               </Link>
             ))}
+            <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
+              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
             {user ? (
               <>
                 <Link href="/profile" passHref>
@@ -91,6 +100,10 @@ const NavBar = () => {
                 </Button>
               </Link>
             ))}
+            <Button variant="ghost" className="w-full justify-start" onClick={toggleTheme}>
+              {theme === 'dark' ? <Sun className="h-5 w-5 mr-2" /> : <Moon className="h-5 w-5 mr-2" />}
+              {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            </Button>
             {user ? (
               <>
                 <Link href="/profile" passHref>
