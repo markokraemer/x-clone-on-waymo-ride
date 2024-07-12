@@ -10,6 +10,7 @@ import LoadingSkeleton from '@/components/LoadingSkeleton';
 import useFeed from '@/hooks/useFeed';
 import useToast from '@/hooks/useToast';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import { useInView } from 'react-intersection-observer';
 
 const extractHashtags = (content) => {
   const hashtagRegex = /#[a-zA-Z0-9_]+/g;
@@ -90,8 +91,18 @@ const Feed = React.forwardRef(({ userOnly = false, onNewPost }, ref) => {
     refreshing,
     handleRefresh,
     createPost,
-    ref: infiniteScrollRef
+    fetchMorePosts
   } = useFeed();
+
+  const [inViewRef, inView] = useInView({
+    threshold: 0,
+  });
+
+  React.useEffect(() => {
+    if (inView && hasMore && !loading) {
+      fetchMorePosts();
+    }
+  }, [inView, hasMore, loading, fetchMorePosts]);
 
   const handlePostSubmit = async (e) => {
     e.preventDefault();
@@ -165,7 +176,7 @@ const Feed = React.forwardRef(({ userOnly = false, onNewPost }, ref) => {
         )}
         {memoizedPosts}
         {loading && <LoadingSkeleton />}
-        {!loading && hasMore && <div ref={infiniteScrollRef} style={{ height: '10px' }}></div>}
+        <div ref={inViewRef} style={{ height: '10px' }}></div>
         {!hasMore && <p className="text-center text-muted-foreground mt-4">No more posts to load</p>}
       </div>
     </ErrorBoundary>
