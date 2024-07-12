@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -94,11 +94,11 @@ const Feed = React.forwardRef(({ userOnly = false, onNewPost }, ref) => {
     fetchMorePosts
   } = useFeed();
 
-  const [inViewRef, inView] = useInView({
+  const { ref: inViewRef, inView } = useInView({
     threshold: 0,
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (inView && hasMore && !loading) {
       fetchMorePosts();
     }
