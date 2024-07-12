@@ -13,6 +13,7 @@ const generateSuggestedUsers = (count) => {
     name: faker.person.fullName(),
     handle: faker.internet.userName().toLowerCase(),
     followers: faker.number.int({ min: 1000, max: 100000 }),
+    isFollowing: false,
   }));
 };
 
@@ -40,10 +41,17 @@ const WhoToFollow = () => {
     fetchSuggestedUsers();
   }, []);
 
-  const handleFollow = (userId) => {
-    // In a real app, you would call an API to follow the user
-    showToast("Success", `You are now following this user!`, "default");
-    setSuggestedUsers(suggestedUsers.filter(user => user.id !== userId));
+  const handleFollowToggle = (userId) => {
+    setSuggestedUsers(prevUsers =>
+      prevUsers.map(user =>
+        user.id === userId
+          ? { ...user, isFollowing: !user.isFollowing }
+          : user
+      )
+    );
+    const user = suggestedUsers.find(u => u.id === userId);
+    const action = user.isFollowing ? 'unfollowed' : 'followed';
+    showToast("Success", `You have ${action} ${user.name}!`, "default");
   };
 
   return (
@@ -70,13 +78,13 @@ const WhoToFollow = () => {
         ) : (
           <AnimatePresence>
             <ul className="space-y-4">
-              {suggestedUsers.map((user) => (
+              {suggestedUsers.map((user, index) => (
                 <motion.li
                   key={user.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
                   className="flex items-center justify-between"
                 >
                   <div className="flex items-center space-x-3">
@@ -86,7 +94,13 @@ const WhoToFollow = () => {
                       <p className="text-sm text-muted-foreground">@{user.handle}</p>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => handleFollow(user.id)}>Follow</Button>
+                  <Button
+                    variant={user.isFollowing ? "secondary" : "outline"}
+                    size="sm"
+                    onClick={() => handleFollowToggle(user.id)}
+                  >
+                    {user.isFollowing ? 'Unfollow' : 'Follow'}
+                  </Button>
                 </motion.li>
               ))}
             </ul>
